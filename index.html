@@ -228,7 +228,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.5</div>
+    <div class="hsub">Asas Wangi Fleet · v5.4</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -319,15 +319,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
       <label class="toggle"><input type="checkbox" id="f-notfull"><span class="toggle-slider"></span></label>
     </div>
     <div class="fld" style="margin-top:8px"><label>备注</label><textarea id="f-note" placeholder="可选备注"></textarea></div>
-    <div class="fld" style="margin-top:8px">
-      <label>附件（收据/照片，可选）</label>
-      <div style="display:flex;align-items:center;gap:8px">
-        <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('f-file-input').click()">📎 选择文件</button>
-        <span style="font-size:11px;color:var(--text3)">JPG · PNG · PDF</span>
-      </div>
-      <input type="file" id="f-file-input" accept="image/*,.pdf" multiple style="display:none" onchange="handleUpload('f',this)">
-      <div id="f-attach-preview" style="margin-top:6px"></div>
-    </div>
     <div class="divider"></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="btn btn-primary" onclick="addFuel()" style="flex:1">记录加油</button>
@@ -408,30 +399,27 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 <div class="panel" id="panel-daterem">
   <div class="card">
     <div class="card-title"><i class="ti ti-calendar-plus"></i> 添加日期提醒</div>
-    <div class="fld fg-full" style="margin-bottom:8px"><label>提醒类型</label>
+    <div class="fg">
+      <div class="fld"><label>提醒类型</label>
         <select id="dr-type">
           <option value="roadtax">Road Tax</option>
           <option value="insurance">保险 (Insurance)</option>
           <option value="puspakom">验车 Puspakom</option>
           <option value="service">定期服务</option>
           <option value="tyre">轮胎更换日期</option>
-          <option value="grant">车辆转让 (Grant)</option>
           <option value="other">其他</option>
         </select>
       </div>
-      <div class="fg-row">
-        <div class="fld fg-date"><label>到期日期</label>
-          <div style="display:flex;gap:5px;align-items:center">
-            <input type="text" id="dr-expiry" placeholder="DD/MM/YY" maxlength="10" style="width:94px" autocomplete="off">
-            <input type="date" id="dr-expiry-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
-            <button type="button" onclick="openPicker('dr-expiry')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 8px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
-          </div>
+      <div class="fld"><label>到期日期</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="text" id="dr-expiry" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
+          <input type="date" id="dr-expiry-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+          <button type="button" onclick="openPicker('dr-expiry')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
         </div>
-        <div class="fld fg-km"><label>提前提醒天数</label><input type="number" id="dr-warn-days" value="30" min="1" max="180"></div>
       </div>
-      <div class="fg-row" style="margin-top:8px">
-        <div class="fld fg-num"><label>费用 (RM，可选)</label><input type="number" id="dr-cost" placeholder="例：800" step="0.01"></div>
-      </div>
+      <div class="fld"><label>提前提醒天数</label><input type="number" id="dr-warn-days" value="30" min="1" max="180"></div>
+      <div class="fld"><label>费用 (RM，可选)</label><input type="number" id="dr-cost" placeholder="例：800" step="0.01"></div>
+    </div>
     <div class="fld" style="margin-top:8px"><label>备注</label><textarea id="dr-note" placeholder="例：Allianz 保险，代理联系：012-3456789"></textarea></div>
     <div class="fld" style="margin-top:8px">
       <label>附件（收据/照片，可选）</label>
@@ -478,13 +466,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 <div class="panel" id="panel-admin">
   <div class="card">
     <div class="card-title"><i class="ti ti-user-plus"></i> 添加新成员</div>
-    <div class="fld fg-full" style="margin-bottom:8px">
-      <label>Gmail 邮箱</label>
-      <input type="email" id="new-member-email" placeholder="xxx@gmail.com">
-    </div>
-    <div class="fld fg-full" style="margin-bottom:8px">
-      <label>显示名称</label>
-      <input type="text" id="new-member-name" placeholder="例：Ahmad">
+    <div class="fg">
+      <div class="fld"><label>Gmail 邮箱</label><input type="email" id="new-member-email" placeholder="xxx@gmail.com"></div>
+      <div class="fld"><label>显示名称</label><input type="text" id="new-member-name" placeholder="例：Ahmad"></div>
     </div>
     <div class="fld" style="margin-top:8px"><label>角色</label>
       <select id="new-member-role">
@@ -634,68 +618,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   </div>
 </div>
 
-<!-- EDIT DATE REMINDER MODAL -->
-<div class="overlay" id="edit-dr-modal" style="display:none">
-  <div class="modal">
-    <div class="modal-title">
-      编辑日期提醒
-      <button class="close-btn" onclick="hideEditDRModal()"
-        style="width:36px;height:36px;border-radius:8px;background:var(--bg4);
-        border:1px solid var(--border2);color:var(--text);font-size:22px;
-        display:flex;align-items:center;justify-content:center">×</button>
-    </div>
-    <input type="hidden" id="edr-id">
-    <input type="hidden" id="edr-orig-type">
-    <div class="fld fg-full" style="margin-bottom:8px"><label>提醒类型</label>
-      <select id="edr-type">
-        <option value="roadtax">Road Tax</option>
-        <option value="insurance">保险 (Insurance)</option>
-        <option value="puspakom">验车 Puspakom</option>
-        <option value="service">定期服务</option>
-        <option value="tyre">轮胎更换日期</option>
-        <option value="grant">车辆转让 (Grant)</option>
-        <option value="other">其他</option>
-      </select>
-    </div>
-    <div class="fg-row">
-      <div class="fld fg-date"><label>到期日期</label>
-        <div style="display:flex;gap:5px;align-items:center">
-          <input type="text" id="edr-expiry" placeholder="DD/MM/YY" maxlength="10" style="width:94px" autocomplete="off">
-          <input type="date" id="edr-expiry-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
-          <button type="button" onclick="openPicker('edr-expiry')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 8px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
-        </div>
-      </div>
-      <div class="fld fg-km"><label>提前提醒天数</label>
-        <input type="number" id="edr-warn-days" min="1" max="180">
-      </div>
-    </div>
-    <div class="fg-row" style="margin-top:8px">
-      <div class="fld fg-num"><label>费用 (RM，可选)</label>
-        <input type="number" id="edr-cost" step="0.01">
-      </div>
-    </div>
-    <div class="fld" style="margin-top:8px"><label>备注</label><textarea id="edr-note"></textarea></div>
-    <div class="fld" style="margin-top:8px">
-      <label>现有附件</label>
-      <div id="edr-attach-current" style="margin-bottom:6px"></div>
-      <label style="margin-top:6px">新增附件</label>
-      <div style="display:flex;align-items:center;gap:8px">
-        <button type="button" class="btn btn-sm btn-ghost"
-          onclick="document.getElementById('edr-file-input').click()">📎 选择文件</button>
-        <span style="font-size:11px;color:var(--text3)">JPG · PNG · PDF</span>
-      </div>
-      <input type="file" id="edr-file-input" accept="image/*,.pdf" multiple
-        style="display:none" onchange="handleUpload('edr',this)">
-      <div id="edr-attach-preview" style="margin-top:6px"></div>
-    </div>
-    <div class="divider"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-ghost" onclick="hideEditDRModal()" style="flex:1">取消</button>
-      <button class="btn btn-primary" onclick="saveEditDR()" style="flex:2">保存修改</button>
-    </div>
-  </div>
-</div>
-
 <!-- CAR MODAL -->
 <div class="overlay" id="car-modal" style="display:none">
   <div class="modal">
@@ -810,7 +732,7 @@ const DEFAULT_MAINT_TYPES = [
   '变速箱油','冷却液','雨刮片','蓄电池','定期保养'
 ];
 let customMaintTypes = [];
-const pendingAttach = { m: [], dr: [], ef: [], em: [], f: [], edr: [] };
+const pendingAttach = { m: [], dr: [], ef: [], em: [] };
 
 let maintFilter = 'all'; // 保养记录筛选状态
 let state = {
@@ -1063,14 +985,12 @@ async function addFuel(){
     await addDoc(collection(db,`${ORG}/cars/${car.id}/fuel`),{
       date,km,liters,price,station,type,note,notFull,
       total:+(liters*price).toFixed(2),
-      attachments:[...pendingAttach.f],
       addedBy:state.currentMember.displayName,addedAt:serverTimestamp()
     });
     ['f-km','f-liters','f-price','f-station','f-note'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('f-notfull').checked=false;
     document.getElementById('fuel-total-preview').textContent='';
     setTodayDate('f-date');
-    clearAttach('f');
   }catch(e){alert('添加失败: '+e.message);}
 }
 async function deleteFuel(id){
@@ -1099,7 +1019,7 @@ function renderFuelList(){
       <span class="rec-name">${esc(r.station)} · <span class="badge bf">${r.type}</span>${r.notFull?' <span class="badge bnf">未加满</span>':''}</span>
       <span class="rec-amt">RM ${r.total.toFixed(2)}</span></div>
     <div class="rec-meta">${r.date} · ${r.km.toLocaleString()} km · ${r.liters}L × RM${r.price}${r.note?' · '+esc(r.note):''}${by}</div>
-    ${renderAttachments(r.attachments)}</div>${edit}${del}</div>`;
+    </div>${edit}${del}</div>`;
   }).join('');
 }
 
@@ -1159,8 +1079,8 @@ function renderMaintList(){
 }
 
 // ── DATE REMINDERS ────────────────────────────────────
-const DR_ICONS={roadtax:'🛂',insurance:'🛡️',puspakom:'🔍',service:'⚙️',tyre:'🛞',grant:'📋',other:'📅'};
-const DR_NAMES={roadtax:'Road Tax',insurance:'Insurance',puspakom:'Puspakom 验车',service:'定期服务',tyre:'轮胎更换',grant:'车辆转让 Grant',other:'其他提醒'};
+const DR_ICONS={roadtax:'🛂',insurance:'🛡️',puspakom:'🔍',service:'⚙️',tyre:'🛞',other:'📅'};
+const DR_NAMES={roadtax:'Road Tax',insurance:'Insurance',puspakom:'Puspakom 验车',service:'定期服务',tyre:'轮胎更换',other:'其他提醒'};
 
 async function addDateReminder(){
   const car=currentCar();if(!car){alert('请先选择车辆');return;}
@@ -1204,7 +1124,6 @@ function renderDRList(){
     const expired=days<0,warn=days>=0&&days<=r.warnDays;
     const col=expired?'var(--red)':warn?'var(--accent)':'var(--green)';
     const tag=expired?'已过期':warn?'即将到期':'正常';
-    const edit=canDelete(r)?`<button class="btn btn-sm btn-ghost" onclick="showEditDRModal('${r.id}')" style="margin-left:6px;flex-shrink:0">编辑</button>`:'';
     const del=canDelete(r)?`<button class="btn btn-sm btn-danger" onclick="deleteDR('${r.id}')" style="margin-left:6px;flex-shrink:0">删</button>`:'';
     const by=r.addedBy?` · 由 ${esc(r.addedBy)} 添加`:'';
     return`<div class="rec"><div class="rec-icon ri-date">${DR_ICONS[r.type]||'📅'}</div>
@@ -1213,7 +1132,7 @@ function renderDRList(){
       <span class="rec-amt" style="color:${col}">${tag}</span></div>
     <div class="rec-meta">到期：${r.expiry} · 提前 ${r.warnDays} 天提醒${r.cost>0?' · RM '+r.cost.toFixed(0):''}${by}</div>
     ${r.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(r.note)}</div>`:''}
-    ${renderAttachments(r.attachments)}</div>${edit}${del}</div>`;
+    ${renderAttachments(r.attachments)}</div>${del}</div>`;
   }).join('');
 }
 function renderDRDash(){
@@ -1771,69 +1690,6 @@ async function saveEditMaint() {
   } catch(e) { alert('保存失败: ' + e.message); }
 }
 
-// ── EDIT DATE REMINDER ────────────────────────────────
-function showEditDRModal(id) {
-  const r = state.currentCarDRs.find(r => r.id === id);
-  if (!r) return;
-  document.getElementById('edr-id').value = id;
-  document.getElementById('edr-orig-type').value = r.type;
-  document.getElementById('edr-type').value = r.type;
-  const [y, m, d] = r.expiry.split('-');
-  document.getElementById('edr-expiry').value = `${d}/${m}/${y.slice(2)}`;
-  document.getElementById('edr-warn-days').value = r.warnDays || 30;
-  document.getElementById('edr-cost').value = r.cost || '';
-  document.getElementById('edr-note').value = r.note || '';
-  let edrCurrentUrls = [...(r.attachments || [])];
-  const edrCurrentEl = document.getElementById('edr-attach-current');
-  function renderEdrCurrent() {
-    edrCurrentEl.innerHTML = edrCurrentUrls.length
-      ? edrCurrentUrls.map((url, i) =>
-          `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-            <a href="${url}" target="_blank" style="font-size:11px;color:var(--blue)">
-              ${url.match(/\.(pdf)($|\?)/i)?'📄':'🖼️'} 附件${i+1}</a>
-            <button type="button" onclick="window._edrRemove(${i})"
-              style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px">×</button>
-          </div>`).join('')
-      : '<div style="font-size:11px;color:var(--text3)">无附件</div>';
-  }
-  window._edrRemove = (i) => { edrCurrentUrls.splice(i,1); renderEdrCurrent(); };
-  window._edrCurrentUrls = () => edrCurrentUrls;
-  renderEdrCurrent();
-  clearAttach('edr');
-  document.getElementById('edit-dr-modal').style.display = 'flex';
-}
-function hideEditDRModal() {
-  document.getElementById('edit-dr-modal').style.display = 'none';
-}
-async function saveEditDR() {
-  const car = currentCar(); if (!car) return;
-  const id = document.getElementById('edr-id').value;
-  const origType = document.getElementById('edr-orig-type').value;
-  const newType = document.getElementById('edr-type').value;
-  const expiry = parseDate(document.getElementById('edr-expiry').value);
-  if (!expiry) { alert('日期格式不正确，请输入 DD/MM/YY'); return; }
-  if (newType !== origType) {
-    const conflict = state.currentCarDRs.find(r => r.type === newType && r.id !== id);
-    if (conflict) {
-      if (!confirm(`「${DR_NAMES[newType]||newType}」已有一条记录，保存将覆盖原有记录，确认继续？`)) return;
-      try { await deleteDoc(doc(db,`${ORG}/cars/${car.id}/dateReminders`,conflict.id)); }
-      catch(e) { alert('处理冲突失败: '+e.message); return; }
-    }
-  }
-  try {
-    await updateDoc(doc(db,`${ORG}/cars/${car.id}/dateReminders`,id), {
-      type: newType,
-      expiry,
-      warnDays: parseInt(document.getElementById('edr-warn-days').value)||30,
-      cost: parseFloat(document.getElementById('edr-cost').value)||0,
-      note: document.getElementById('edr-note').value,
-      attachments: [...(window._edrCurrentUrls?window._edrCurrentUrls():[]), ...pendingAttach.edr]
-    });
-    hideEditDRModal();
-    clearAttach('edr');
-  } catch(e) { alert('保存失败: '+e.message); }
-}
-
 // ── SUGGESTIONS ──────────────────────────────────────
 let suggestData = { station: [], shop: [] };
 function setMaintFilter(val) {
@@ -1919,11 +1775,15 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('#more-menu')&&!e.target.closest('#bnav-more-btn'))closeMoreMenu();
 });
 
-// ── EVENT LISTENERS + KM HINTS ────────────────────────
+// ── EVENT LISTENERS ───────────────────────────────────
+document.getElementById('f-liters').addEventListener('input',updatePreview);
+document.getElementById('f-price').addEventListener('input',updatePreview);
+document.getElementById('m-type').addEventListener('change',autoNextKm);
+document.getElementById('m-km').addEventListener('input',autoNextKm);
+
+// ── KM HINTS ──────────────────────────────────────────
 function attachKmHint(inputId,type){
-  const el=document.getElementById(inputId);
-  if(!el)return;
-  el.addEventListener('focus',()=>{
+  document.getElementById(inputId).addEventListener('focus',()=>{
     const car=currentCar();if(!car)return;
     const records=type==='fuel'?car.fuel:car.maint;
     if(!records.length)return;
@@ -1932,23 +1792,13 @@ function attachKmHint(inputId,type){
     if(!hint){
       hint=document.createElement('div');hint.id=inputId+'-hint';
       hint.style.cssText='font-size:11px;color:var(--text3);margin-top:3px';
-      el.insertAdjacentElement('afterend',hint);
+      document.getElementById(inputId).insertAdjacentElement('afterend',hint);
     }
     hint.textContent=`上次记录：${lastKm.toLocaleString()} km`;
   });
 }
-document.addEventListener('DOMContentLoaded',()=>{
-  const fl=document.getElementById('f-liters');
-  const fp=document.getElementById('f-price');
-  const mt=document.getElementById('m-type');
-  const mk=document.getElementById('m-km');
-  if(fl)fl.addEventListener('input',updatePreview);
-  if(fp)fp.addEventListener('input',updatePreview);
-  if(mt)mt.addEventListener('change',autoNextKm);
-  if(mk)mk.addEventListener('input',autoNextKm);
-  attachKmHint('f-km','fuel');
-  attachKmHint('m-km','maint');
-});
+attachKmHint('f-km','fuel');
+attachKmHint('m-km','maint');
 
 // ── SERVICE WORKER ────────────────────────────────────
 if('serviceWorker' in navigator){
@@ -1967,7 +1817,6 @@ Object.assign(window,{
   handleUpload,removeAttach,
   showEditFuelModal,hideEditFuelModal,saveEditFuel,
   showEditMaintModal,hideEditMaintModal,saveEditMaint,
-  showEditDRModal,hideEditDRModal,saveEditDR,
   openSuggest,filterSuggest,selectSuggest,
   setMaintFilter,refreshMaintFilter
 });
