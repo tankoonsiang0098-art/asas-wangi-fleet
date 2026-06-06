@@ -22,7 +22,8 @@
   --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
   --r:10px;--hf:'Rajdhani',sans-serif;--bf:'Inter',sans-serif;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px;min-height:100vh}
+#page-login,#page-pending{min-height:100vh}
 .app{padding:14px;max-width:860px;margin:0 auto}
 .hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .logo{width:38px;height:38px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -220,14 +221,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 </div>
 
 <!-- ── MAIN APP ────────────────────────────────────── -->
-<div id="page-app" style="display:none">
+<div id="page-app" style="display:none;min-height:100vh">
 <div class="app">
 
 <div class="hdr">
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.3</div>
+    <div class="hsub">Asas Wangi Fleet · v5.4</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -271,21 +272,37 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 <div class="panel" id="panel-fuel">
   <div class="card">
     <div class="card-title"><i class="ti ti-gas-station"></i> 添加加油记录</div>
-    <!-- 行1：日期 + 里程 -->
+    <!-- 行1：日期（紧凑）+ 里程 -->
     <div class="fg-row">
-      <div class="fld fg-date"><label>日期</label>
-        <div style="display:flex;gap:6px;align-items:center">
-          <input type="text" id="f-date" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
-          <input type="date" id="f-date-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
-          <button type="button" onclick="openPicker('f-date')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
+      <div class="fld" style="flex:0 0 auto"><label>日期</label>
+        <div style="display:flex;gap:5px;align-items:center">
+          <input type="text" id="f-date" placeholder="DD/MM/YY" maxlength="10"
+            style="width:94px" autocomplete="off">
+          <input type="date" id="f-date-hidden"
+            style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+          <button type="button" onclick="openPicker('f-date')"
+            style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;
+            color:var(--text2);padding:7px 8px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
         </div>
       </div>
-      <div class="fld fg-km"><label>里程 (km)</label><input type="number" id="f-km" placeholder="45230"></div>
+      <div class="fld fg-km"><label>里程 (km)</label>
+        <input type="number" id="f-km" placeholder="45230">
+      </div>
     </div>
-    <!-- 行2：升数 + 单价 -->
+    <!-- 行2：升数 + 单价 + 油品（三列） -->
     <div class="fg-row">
-      <div class="fld fg-num"><label>升数 (L)</label><input type="number" id="f-liters" placeholder="40" step="0.1"></div>
-      <div class="fld fg-num"><label>单价 (RM/L)</label><input type="number" id="f-price" placeholder="2.05" step="0.01"></div>
+      <div class="fld" style="flex:1;min-width:70px"><label>升数 (L)</label>
+        <input type="number" id="f-liters" placeholder="40" step="0.1">
+      </div>
+      <div class="fld" style="flex:1;min-width:80px"><label>单价 (RM/L)</label>
+        <input type="number" id="f-price" placeholder="2.05" step="0.01">
+      </div>
+      <div class="fld" style="flex:0 0 100px"><label>油品</label>
+        <select id="f-type">
+          <option>RON95</option><option>RON97</option>
+          <option>柴油</option><option>其他</option>
+        </select>
+      </div>
     </div>
     <!-- 行3：油站（全宽）-->
     <div class="fld fg-full"><label>油站</label>
@@ -295,12 +312,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
           oninput="filterSuggest('f-station','station')">
         <span class="suggest-arrow">▼</span>
         <div class="suggest-dropdown" id="suggest-station"></div>
-      </div>
-    </div>
-    <!-- 行4：油品 -->
-    <div class="fg-row" style="margin-top:8px">
-      <div class="fld fg-type"><label>油品</label>
-        <select id="f-type"><option>RON95</option><option>RON97</option><option>柴油</option><option>其他</option></select>
       </div>
     </div>
     <div class="toggle-row">
@@ -369,7 +380,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
     <div class="divider"></div>
     <button class="btn btn-primary" onclick="addMaint()" style="width:100%">记录保养</button>
   </div>
-  <div class="sh">历史保养记录</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;
+    margin:14px 0 8px">
+    <div class="sh" style="margin:0">历史保养记录</div>
+    <select id="maint-filter-sel"
+      onchange="setMaintFilter(this.value)"
+      style="background:var(--bg3);border:1px solid var(--border2);
+      border-radius:7px;padding:5px 10px;color:var(--text2);
+      font-family:var(--bf);font-size:12px;outline:none;cursor:pointer;
+      max-width:150px">
+      <option value="all">全部项目</option>
+    </select>
+  </div>
   <div id="maint-list"><div class="empty">暂无记录</div></div>
 </div>
 
@@ -712,6 +734,7 @@ const DEFAULT_MAINT_TYPES = [
 let customMaintTypes = [];
 const pendingAttach = { m: [], dr: [], ef: [], em: [] };
 
+let maintFilter = 'all'; // 保养记录筛选状态
 let state = {
   currentCarId:null, cars:[], currentCarFuel:[], currentCarMaint:[], currentCarDRs:[],
   currentUser:null, currentMember:null, members:[]
@@ -905,7 +928,12 @@ function setTodayDate(fieldId){
 }
 
 // ── CAR MANAGEMENT ────────────────────────────────────
-function selectCar(id){if(id===state.currentCarId)return;state.currentCarId=id;listenToCarData(id);}
+function selectCar(id){
+  if(id===state.currentCarId)return;
+  state.currentCarId=id;
+  maintFilter='all';
+  listenToCarData(id);
+}
 async function addCar(){
   const plate=document.getElementById('new-plate').value.trim().toUpperCase();
   const model=document.getElementById('new-model').value.trim();
@@ -1031,7 +1059,9 @@ function autoNextKm(){
   if(MAINT_INTERVALS[t]&&km)document.getElementById('m-next-km').value=km+MAINT_INTERVALS[t];
 }
 function renderMaintList(){
-  const c=currentCar();const maint=c?[...c.maint].reverse():[];
+  const c=currentCar();
+  let maint=c?[...c.maint].reverse():[];
+  if(maintFilter !== 'all') maint = maint.filter(r => r.type === maintFilter);
   const el=document.getElementById('maint-list');
   if(!maint.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
   el.innerHTML=maint.map(r=>{
@@ -1366,7 +1396,7 @@ function renderAnalytics(){
   const mo={};
   fuel.forEach(r=>{const m=r.date.slice(0,7);mo[m]=(mo[m]||{f:0,m:0});mo[m].f+=r.total;});
   maint.forEach(r=>{const m=r.date.slice(0,7);mo[m]=(mo[m]||{f:0,m:0});mo[m].m+=r.cost;});
-  const mkeys=Object.keys(mo).sort().slice(-12);
+  const mkeys=Object.keys(mo).sort().reverse().slice(0,12);
   const md=document.getElementById('monthly-detail');
   if(!mkeys.length){md.innerHTML='<div class="empty">暂无数据</div>';}
   else{const mv=Math.max(...mkeys.map(k=>mo[k].f+mo[k].m),1);
@@ -1381,6 +1411,7 @@ function renderAnalytics(){
   else{const mx2=Math.max(...effs.map(e=>e.kmL),1);
     const avg=(effs.reduce((s,e)=>s+e.kmL,0)/effs.length).toFixed(1);
     const min=Math.min(...effs.map(e=>e.kmL)).toFixed(1),max=Math.max(...effs.map(e=>e.kmL)).toFixed(1);
+    effs.reverse();
     ed.innerHTML=`<div style="display:flex;gap:16px;margin-bottom:10px;font-size:12px">
       <span style="color:var(--text2)">平均 <strong style="color:var(--accent)">${avg} km/L</strong></span>
       <span style="color:var(--text2)">最佳 <strong style="color:var(--green)">${max}</strong></span>
@@ -1661,6 +1692,27 @@ async function saveEditMaint() {
 
 // ── SUGGESTIONS ──────────────────────────────────────
 let suggestData = { station: [], shop: [] };
+function setMaintFilter(val) {
+  maintFilter = val;
+  renderMaintList();
+}
+
+function refreshMaintFilter() {
+  const sel = document.getElementById('maint-filter-sel');
+  if (!sel) return;
+  const c = currentCar();
+  const types = [...new Set((c?.maint || []).map(r => r.type))].sort();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="all">全部项目</option>' +
+    types.map(t =>
+      `<option value="${esc(t)}"${t === cur ? ' selected' : ''}>${esc(t)}</option>`
+    ).join('');
+  if (cur !== 'all' && !types.includes(cur)) {
+    sel.value = 'all';
+    maintFilter = 'all';
+  }
+}
+
 function refreshSuggestions() {
   const c = currentCar();
   suggestData.station = [...new Set((c?.fuel || []).map(r => r.station).filter(s => s && s !== '未填写'))];
@@ -1710,6 +1762,7 @@ function renderAll(){
   if(at==='analytics')renderAnalytics();
   if(at==='records')renderAllRecords();
   refreshSuggestions();
+  refreshMaintFilter();
 }
 
 // ── BOTTOM NAV ────────────────────────────────────────
@@ -1764,7 +1817,8 @@ Object.assign(window,{
   handleUpload,removeAttach,
   showEditFuelModal,hideEditFuelModal,saveEditFuel,
   showEditMaintModal,hideEditMaintModal,saveEditMaint,
-  openSuggest,filterSuggest,selectSuggest
+  openSuggest,filterSuggest,selectSuggest,
+  setMaintFilter,refreshMaintFilter
 });
 </script>
 </body>
