@@ -1960,14 +1960,10 @@ document.addEventListener('click',e=>{
 });
 
 // ── EVENT LISTENERS ───────────────────────────────────
-document.getElementById('f-liters').addEventListener('input',updatePreview);
-document.getElementById('f-price').addEventListener('input',updatePreview);
-document.getElementById('m-type').addEventListener('change',autoNextKm);
-document.getElementById('m-km').addEventListener('input',autoNextKm);
-
-// ── KM HINTS ──────────────────────────────────────────
 function attachKmHint(inputId,type){
-  document.getElementById(inputId).addEventListener('focus',()=>{
+  const el=document.getElementById(inputId);
+  if(!el)return;
+  el.addEventListener('focus',()=>{
     const car=currentCar();if(!car)return;
     const records=type==='fuel'?car.fuel:car.maint;
     if(!records.length)return;
@@ -1981,8 +1977,18 @@ function attachKmHint(inputId,type){
     hint.textContent=`上次记录：${lastKm.toLocaleString()} km`;
   });
 }
-attachKmHint('f-km','fuel');
-attachKmHint('m-km','maint');
+document.addEventListener('DOMContentLoaded',()=>{
+  const fl=document.getElementById('f-liters');
+  const fp=document.getElementById('f-price');
+  const mt=document.getElementById('m-type');
+  const mk=document.getElementById('m-km');
+  if(fl)fl.addEventListener('input',updatePreview);
+  if(fp)fp.addEventListener('input',updatePreview);
+  if(mt)mt.addEventListener('change',autoNextKm);
+  if(mk)mk.addEventListener('input',autoNextKm);
+  attachKmHint('f-km','fuel');
+  attachKmHint('m-km','maint');
+});
 
 // ── SERVICE WORKER ────────────────────────────────────
 if('serviceWorker' in navigator){
