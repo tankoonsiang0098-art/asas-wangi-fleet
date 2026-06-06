@@ -2,7 +2,13 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AutoLog">
+<meta name="theme-color" content="#e8a020">
 <title>AUTO LOG PRO — Asas Wangi</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -53,7 +59,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 .fld textarea{resize:vertical;min-height:48px}
 .divider{height:1px;background:var(--border);margin:12px 0}
 .empty{text-align:center;padding:22px 12px;color:var(--text3);font-size:13px}
-.empty i{font-size:24px;display:block;margin-bottom:6px;opacity:.4}
 .rec{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px;margin-bottom:7px;display:flex;align-items:flex-start;gap:9px}
 .rec-icon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .ri-fuel{background:rgba(232,160,32,.15);color:var(--accent)}
@@ -112,28 +117,50 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 .dr-right{text-align:right;flex-shrink:0}
 .dr-status{font-size:12px;font-weight:600}
 .dr-days{font-size:11px;color:var(--text3);margin-top:1px}
-/* Login / Pending */
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
 .login-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:40px 32px;text-align:center;max-width:360px;width:100%}
 .btn-google{background:#fff;color:#333;border:none;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:24px}
 .btn-google:hover{background:#f0f0f0}
 .pending-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
 .pending-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:32px;text-align:center;max-width:360px;width:100%}
-/* User info */
 .user-info{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)}
 .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;flex-shrink:0}
-/* Member management */
 .member-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap}
 .member-row:last-child{border-bottom:none}
 .member-info{flex:1;min-width:0}
 .member-name{font-size:13px;font-weight:500}
 .member-meta{font-size:11px;color:var(--text3);margin-top:2px}
 .member-actions{display:flex;gap:6px;flex-shrink:0}
+/* ── v5 Bottom Nav ── */
+#bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg2);border-top:1px solid var(--border2);
+  padding:6px 0 env(safe-area-inset-bottom,6px);
+  z-index:50;justify-content:space-around;
+}
+.bnav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:2px;background:none;border:none;cursor:pointer;
+  padding:4px 0;color:var(--text3);
+  font-family:var(--hf);font-size:10px;letter-spacing:.5px;transition:color .2s;
+}
+.bnav-btn.active{color:var(--accent);}
+.more-menu-btn{
+  display:block;width:100%;text-align:left;background:none;
+  border:none;color:var(--text);font-size:13px;
+  padding:9px 12px;border-radius:7px;cursor:pointer;
+}
+.more-menu-btn:hover{background:var(--bg4);}
+@media(max-width:767px){
+  #bottom-nav{display:flex;}
+  .tabs{display:none;}
+  .app{padding-bottom:75px;}
+}
 </style>
 </head>
 <body>
 
-<!-- ── LOGIN PAGE ──────────────────────────────────── -->
+<!-- ── LOGIN ───────────────────────────────────────── -->
 <div id="page-login">
 <div class="login-page">
   <div class="login-card">
@@ -149,7 +176,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 </div>
 </div>
 
-<!-- ── PENDING PAGE ────────────────────────────────── -->
+<!-- ── PENDING ─────────────────────────────────────── -->
 <div id="page-pending" style="display:none">
 <div class="pending-page">
   <div class="pending-card">
@@ -167,12 +194,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 <div id="page-app" style="display:none">
 <div class="app">
 
-<!-- HEADER -->
 <div class="hdr">
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet</div>
+    <div class="hsub">Asas Wangi Fleet · v5.0</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -185,7 +211,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   </div>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
   <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">总览</button>
   <button class="tab" data-tab="fuel" onclick="switchTab('fuel')">加油</button>
@@ -218,7 +243,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="card">
     <div class="card-title"><i class="ti ti-gas-station"></i> 添加加油记录</div>
     <div class="fg">
-      <div class="fld"><label>日期</label><input type="date" id="f-date"></div>
+      <div class="fld"><label>日期</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="text" id="f-date" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
+          <input type="date" id="f-date-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+          <button type="button" onclick="openPicker('f-date')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
+        </div>
+      </div>
       <div class="fld"><label>当前里程 (km)</label><input type="number" id="f-km" placeholder="例：45230"></div>
       <div class="fld"><label>加油量 (升)</label><input type="number" id="f-liters" placeholder="例：40" step="0.1"></div>
       <div class="fld"><label>单价 (RM/升)</label><input type="number" id="f-price" placeholder="例：2.05" step="0.01"></div>
@@ -245,22 +276,34 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="card">
     <div class="card-title"><i class="ti ti-tool"></i> 添加保养记录</div>
     <div class="fg">
-      <div class="fld"><label>日期</label><input type="date" id="m-date"></div>
+      <div class="fld"><label>日期</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="text" id="m-date" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
+          <input type="date" id="m-date-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+          <button type="button" onclick="openPicker('m-date')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
+        </div>
+      </div>
       <div class="fld"><label>当前里程 (km)</label><input type="number" id="m-km" placeholder="例：45230"></div>
       <div class="fld"><label>保养项目</label>
-        <select id="m-type">
-          <option>机油更换</option><option>机油滤芯</option><option>空气滤芯</option>
-          <option>刹车片</option><option>刹车油</option><option>轮胎更换</option>
-          <option>轮胎气压</option><option>Gearbox Oil</option><option>火花塞</option>
-          <option>变速箱油</option><option>冷却液</option><option>雨刮片</option>
-          <option>蓄电池</option><option>定期保养</option><option>其他</option>
-        </select>
+        <div style="display:flex;gap:6px">
+          <select id="m-type" style="flex:1"></select>
+          <button type="button" class="btn btn-sm btn-ghost" onclick="showAddTypeModal()" title="添加自定义项目">＋</button>
+        </div>
       </div>
       <div class="fld"><label>费用 (RM)</label><input type="number" id="m-cost" placeholder="例：150" step="0.01"></div>
       <div class="fld"><label>下次保养里程 (km)</label><input type="number" id="m-next-km" placeholder="自动计算"></div>
       <div class="fld"><label>维修店</label><input type="text" id="m-shop" placeholder="例：Honda Service Centre"></div>
     </div>
     <div class="fld" style="margin-top:8px"><label>备注</label><textarea id="m-note" placeholder="例：Castrol 5W-40"></textarea></div>
+    <div class="fld" style="margin-top:8px">
+      <label>附件（收据/照片，可选）</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('m-file-input').click()">📎 选择文件</button>
+        <span style="font-size:11px;color:var(--text3)">JPG · PNG · PDF</span>
+      </div>
+      <input type="file" id="m-file-input" accept="image/*,.pdf" multiple style="display:none" onchange="handleUpload('m',this)">
+      <div id="m-attach-preview" style="margin-top:6px"></div>
+    </div>
     <div class="divider"></div>
     <button class="btn btn-primary" onclick="addMaint()" style="width:100%">记录保养</button>
   </div>
@@ -283,11 +326,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
           <option value="other">其他</option>
         </select>
       </div>
-      <div class="fld"><label>到期日期</label><input type="date" id="dr-expiry"></div>
+      <div class="fld"><label>到期日期</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="text" id="dr-expiry" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
+          <input type="date" id="dr-expiry-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+          <button type="button" onclick="openPicker('dr-expiry')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
+        </div>
+      </div>
       <div class="fld"><label>提前提醒天数</label><input type="number" id="dr-warn-days" value="30" min="1" max="180"></div>
       <div class="fld"><label>费用 (RM，可选)</label><input type="number" id="dr-cost" placeholder="例：800" step="0.01"></div>
     </div>
     <div class="fld" style="margin-top:8px"><label>备注</label><textarea id="dr-note" placeholder="例：Allianz 保险，代理联系：012-3456789"></textarea></div>
+    <div class="fld" style="margin-top:8px">
+      <label>附件（收据/照片，可选）</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('dr-file-input').click()">📎 选择文件</button>
+        <span style="font-size:11px;color:var(--text3)">JPG · PNG · PDF</span>
+      </div>
+      <input type="file" id="dr-file-input" accept="image/*,.pdf" multiple style="display:none" onchange="handleUpload('dr',this)">
+      <div id="dr-attach-preview" style="margin-top:6px"></div>
+    </div>
     <div class="divider"></div>
     <button class="btn btn-primary" onclick="addDateReminder()" style="width:100%">添加提醒</button>
   </div>
@@ -371,7 +429,57 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   </div>
 </div>
 
+<!-- ADD MAINT TYPE MODAL -->
+<div class="overlay" id="add-type-modal" style="display:none">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-title">自定义保养项目
+      <button class="close-btn" onclick="document.getElementById('add-type-modal').style.display='none'">×</button>
+    </div>
+    <div class="fld">
+      <label>项目名称</label>
+      <input type="text" id="new-type-name" placeholder="例：Power Steering Oil">
+    </div>
+    <div class="fld" style="margin-top:8px">
+      <label>默认保养间隔 km（可选）</label>
+      <input type="number" id="new-type-interval" placeholder="例：40000">
+    </div>
+    <button class="btn btn-primary" onclick="saveCustomType()" style="width:100%;margin-top:12px">添加</button>
+    <div class="sh" style="margin-top:12px">已自定义项目</div>
+    <div id="custom-types-list"></div>
+  </div>
+</div>
+
 </div><!-- .app -->
+
+<!-- BOTTOM NAV -->
+<nav id="bottom-nav">
+  <button class="bnav-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+    <span style="font-size:18px">🏠</span><span>总览</span>
+  </button>
+  <button class="bnav-btn" data-tab="fuel" onclick="switchTab('fuel')">
+    <span style="font-size:18px">⛽</span><span>加油</span>
+  </button>
+  <button class="bnav-btn" data-tab="maintenance" onclick="switchTab('maintenance')">
+    <span style="font-size:18px">🔧</span><span>保养</span>
+  </button>
+  <button class="bnav-btn" data-tab="daterem" onclick="switchTab('daterem')">
+    <span style="font-size:18px">📅</span><span>提醒</span>
+  </button>
+  <button class="bnav-btn" id="bnav-more-btn" onclick="toggleMoreMenu()">
+    <span style="font-size:18px">···</span><span>更多</span>
+  </button>
+</nav>
+
+<!-- MORE MENU -->
+<div id="more-menu" style="display:none;position:fixed;bottom:65px;right:12px;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:10px;
+  padding:8px;z-index:51;min-width:150px">
+  <button class="more-menu-btn" onclick="switchTab('analytics');closeMoreMenu()">📊 分析</button>
+  <button class="more-menu-btn" onclick="switchTab('records');closeMoreMenu()">📋 记录</button>
+  <button class="more-menu-btn" id="more-admin-btn" style="display:none"
+    onclick="switchTab('admin');closeMoreMenu()">⚙️ 管理</button>
+</div>
+
 </div><!-- #page-app -->
 
 <script type="module">
@@ -393,25 +501,32 @@ const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
 const ORG = 'organisations/asas-wangi';
 const ADMIN_EMAIL = 'tankoonsiang0098@gmail.com';
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dzch3lpwm/auto/upload';
+const CLOUDINARY_PRESET = 'autolog_upload';
+
+const MAINT_INTERVALS = {
+  '机油更换':5000,'机油滤芯':5000,'空气滤芯':15000,'火花塞':30000,
+  '变速箱油':40000,'Gearbox Oil':40000,'定期保养':10000,
+  '刹车油':40000,'冷却液':40000,'轮胎更换':60000
+};
+const DEFAULT_MAINT_TYPES = [
+  '机油更换','机油滤芯','空气滤芯','刹车片','刹车油',
+  '轮胎更换','轮胎气压','Gearbox Oil','火花塞',
+  '变速箱油','冷却液','雨刮片','蓄电池','定期保养'
+];
+let customMaintTypes = [];
+const pendingAttach = { m: [], dr: [] };
 
 let state = {
-  currentCarId: null,
-  cars: [],
-  currentCarFuel: [],
-  currentCarMaint: [],
-  currentCarDRs: [],
-  currentUser: null,
-  currentMember: null,
-  members: []
+  currentCarId:null, cars:[], currentCarFuel:[], currentCarMaint:[], currentCarDRs:[],
+  currentUser:null, currentMember:null, members:[]
 };
+const unsubs = { cars:null, fuel:null, maint:null, drs:null, member:null, members:null };
 
-const unsubs = { cars: null, fuel: null, maint: null, drs: null, member: null, members: null };
-
-// ── PAGE CONTROL ──────────────────────────────────────
+// ── PAGE ──────────────────────────────────────────────
 function showPage(name) {
   ['login','pending','app'].forEach(p =>
-    document.getElementById('page-'+p).style.display = p === name ? '' : 'none'
-  );
+    document.getElementById('page-'+p).style.display = p===name ? '' : 'none');
 }
 
 // ── AUTH ──────────────────────────────────────────────
@@ -421,226 +536,220 @@ async function loginWithGoogle() {
     await signInWithPopup(auth, new GoogleAuthProvider());
   } catch(e) {
     document.getElementById('btn-login').disabled = false;
-    if (e.code !== 'auth/popup-closed-by-user') alert('登录失败: ' + e.message);
+    if (e.code !== 'auth/popup-closed-by-user') alert('登录失败: '+e.message);
   }
 }
-
 async function doSignOut() {
-  Object.values(unsubs).forEach(u => u && u());
-  Object.keys(unsubs).forEach(k => unsubs[k] = null);
+  Object.values(unsubs).forEach(u=>u&&u());
+  Object.keys(unsubs).forEach(k=>unsubs[k]=null);
   await signOut(auth);
-  state = { currentCarId:null, cars:[], currentCarFuel:[], currentCarMaint:[], currentCarDRs:[], currentUser:null, currentMember:null, members:[] };
+  state={currentCarId:null,cars:[],currentCarFuel:[],currentCarMaint:[],currentCarDRs:[],currentUser:null,currentMember:null,members:[]};
   showPage('login');
-  document.getElementById('login-status').textContent = '';
-  document.getElementById('btn-login').style.display = '';
-  document.getElementById('btn-login').disabled = false;
+  document.getElementById('login-status').textContent='';
+  document.getElementById('btn-login').style.display='';
+  document.getElementById('btn-login').disabled=false;
 }
 
 onAuthStateChanged(auth, async user => {
   if (!user) {
     showPage('login');
-    document.getElementById('login-status').textContent = '';
-    document.getElementById('btn-login').style.display = '';
+    document.getElementById('login-status').textContent='';
+    document.getElementById('btn-login').style.display='';
     return;
   }
-  document.getElementById('login-status').textContent = '正在验证身份…';
-  document.getElementById('btn-login').style.display = 'none';
+  document.getElementById('login-status').textContent='正在验证身份…';
+  document.getElementById('btn-login').style.display='none';
   showPage('login');
   state.currentUser = user;
   try {
-    const memberSnap = await getDoc(doc(db, `${ORG}/members`, user.uid));
-    if (memberSnap.exists()) {
-      state.currentMember = { ...memberSnap.data(), uid: user.uid };
-      startApp(); return;
+    const ms = await getDoc(doc(db,`${ORG}/members`,user.uid));
+    if (ms.exists()) { state.currentMember={...ms.data(),uid:user.uid}; startApp(); return; }
+    const pk = btoa(user.email.toLowerCase());
+    const ps = await getDoc(doc(db,`${ORG}/pending-members`,pk));
+    if (ps.exists()) {
+      const d=ps.data();
+      await setDoc(doc(db,`${ORG}/members`,user.uid),{...d,uid:user.uid,email:user.email,joinedAt:serverTimestamp()});
+      await deleteDoc(doc(db,`${ORG}/pending-members`,pk));
+      const s2=await getDoc(doc(db,`${ORG}/members`,user.uid));
+      state.currentMember={...s2.data(),uid:user.uid}; startApp(); return;
     }
-    const pendingKey = btoa(user.email.toLowerCase());
-    const pendingSnap = await getDoc(doc(db, `${ORG}/pending-members`, pendingKey));
-    if (pendingSnap.exists()) {
-      const data = pendingSnap.data();
-      await setDoc(doc(db, `${ORG}/members`, user.uid), { ...data, uid: user.uid, email: user.email, joinedAt: serverTimestamp() });
-      await deleteDoc(doc(db, `${ORG}/pending-members`, pendingKey));
-      const snap2 = await getDoc(doc(db, `${ORG}/members`, user.uid));
-      state.currentMember = { ...snap2.data(), uid: user.uid };
-      startApp(); return;
-    }
-    if (user.email === ADMIN_EMAIL) {
+    if (user.email===ADMIN_EMAIL) {
       await createAdminMember(user);
-      const snap3 = await getDoc(doc(db, `${ORG}/members`, user.uid));
-      state.currentMember = { ...snap3.data(), uid: user.uid };
-      startApp(); return;
+      const s3=await getDoc(doc(db,`${ORG}/members`,user.uid));
+      state.currentMember={...s3.data(),uid:user.uid}; startApp(); return;
     }
-    document.getElementById('pending-email').textContent = user.email;
+    document.getElementById('pending-email').textContent=user.email;
     showPage('pending');
   } catch(e) {
-    console.error(e);
-    alert('初始化失败: ' + e.message);
+    console.error(e); alert('初始化失败: '+e.message);
     showPage('login');
-    document.getElementById('login-status').textContent = '';
-    document.getElementById('btn-login').style.display = '';
-    document.getElementById('btn-login').disabled = false;
+    document.getElementById('login-status').textContent='';
+    document.getElementById('btn-login').style.display='';
+    document.getElementById('btn-login').disabled=false;
   }
 });
 
 async function createAdminMember(user) {
-  const orgRef = doc(db, 'organisations/asas-wangi');
-  const orgSnap = await getDoc(orgRef);
-  if (!orgSnap.exists()) await setDoc(orgRef, { name: 'Asas Wangi', createdAt: serverTimestamp() });
-  await setDoc(doc(db, `${ORG}/members`, user.uid), {
-    uid: user.uid, email: user.email,
-    displayName: user.displayName || 'Admin',
-    role: 'admin', assignedCars: ['all'],
-    joinedAt: serverTimestamp()
+  const or=doc(db,'organisations/asas-wangi');
+  const os=await getDoc(or);
+  if(!os.exists()) await setDoc(or,{name:'Asas Wangi',createdAt:serverTimestamp()});
+  await setDoc(doc(db,`${ORG}/members`,user.uid),{
+    uid:user.uid,email:user.email,displayName:user.displayName||'Admin',
+    role:'admin',assignedCars:['all'],joinedAt:serverTimestamp()
   });
 }
 
 function startApp() {
-  const m = state.currentMember;
-  document.getElementById('user-name').textContent = m.displayName;
-  document.getElementById('user-avatar').textContent = m.displayName[0].toUpperCase();
-  if (m.role === 'admin') {
-    document.getElementById('tab-admin').style.display = '';
-    document.getElementById('btn-manage-cars').style.display = '';
-    document.getElementById('btn-clear').style.display = '';
+  const m=state.currentMember;
+  document.getElementById('user-name').textContent=m.displayName;
+  document.getElementById('user-avatar').textContent=m.displayName[0].toUpperCase();
+  if (m.role==='admin') {
+    document.getElementById('tab-admin').style.display='';
+    document.getElementById('btn-manage-cars').style.display='';
+    document.getElementById('btn-clear').style.display='';
+    document.getElementById('more-admin-btn').style.display='block';
     listenToMembers();
   }
-  document.getElementById('f-date').value = today();
-  document.getElementById('m-date').value = today();
+  setTodayDate('f-date');
+  setTodayDate('m-date');
   showPage('app');
-  unsubs.member = onSnapshot(doc(db, `${ORG}/members`, state.currentUser.uid), snap => {
-    if (!snap.exists()) return;
-    state.currentMember = { ...snap.data(), uid: snap.id };
+  unsubs.member=onSnapshot(doc(db,`${ORG}/members`,state.currentUser.uid),snap=>{
+    if(!snap.exists())return;
+    state.currentMember={...snap.data(),uid:snap.id};
     listenToCars();
   });
   listenToCars();
+  loadCustomMaintTypes();
 }
 
-// ── FIRESTORE LISTENERS ───────────────────────────────
+// ── FIRESTORE ─────────────────────────────────────────
 function listenToCars() {
-  if (unsubs.cars) unsubs.cars();
-  unsubs.cars = onSnapshot(collection(db, `${ORG}/cars`), snap => {
-    let all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const m = state.currentMember;
-    if (m && m.role !== 'admin') {
-      const assigned = m.assignedCars || [];
-      if (!assigned.includes('all')) all = all.filter(c => assigned.includes(c.id));
+  if(unsubs.cars)unsubs.cars();
+  unsubs.cars=onSnapshot(collection(db,`${ORG}/cars`),snap=>{
+    let all=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const m=state.currentMember;
+    if(m&&m.role!=='admin'){
+      const assigned=m.assignedCars||[];
+      if(!assigned.includes('all')) all=all.filter(c=>assigned.includes(c.id));
     }
-    all.sort((a, b) => (a.plate||'').localeCompare(b.plate||''));
-    state.cars = all;
-    if (!state.currentCarId && all.length) {
-      state.currentCarId = all[0].id;
-      listenToCarData(state.currentCarId);
-    } else if (state.currentCarId && !all.find(c => c.id === state.currentCarId)) {
-      state.currentCarId = all.length ? all[0].id : null;
-      if (state.currentCarId) listenToCarData(state.currentCarId);
-      else stopCarListeners();
+    all.sort((a,b)=>(a.plate||'').localeCompare(b.plate||''));
+    state.cars=all;
+    if(!state.currentCarId&&all.length){state.currentCarId=all[0].id;listenToCarData(state.currentCarId);}
+    else if(state.currentCarId&&!all.find(c=>c.id===state.currentCarId)){
+      state.currentCarId=all.length?all[0].id:null;
+      if(state.currentCarId)listenToCarData(state.currentCarId);else stopCarListeners();
     }
-    renderCarSel();
-    renderDashboard();
-    renderAnalytics();
+    renderCarSel();renderDashboard();renderAnalytics();
   });
 }
-
 function listenToCarData(carId) {
   stopCarListeners();
-  if (!carId) return;
-  const base = `${ORG}/cars/${carId}`;
-  unsubs.fuel = onSnapshot(collection(db, `${base}/fuel`), snap => {
-    state.currentCarFuel = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    state.currentCarFuel.sort((a, b) => (a.km||0) - (b.km||0));
-    renderAll();
+  if(!carId)return;
+  const base=`${ORG}/cars/${carId}`;
+  unsubs.fuel=onSnapshot(collection(db,`${base}/fuel`),snap=>{
+    state.currentCarFuel=snap.docs.map(d=>({id:d.id,...d.data()}));
+    state.currentCarFuel.sort((a,b)=>(a.km||0)-(b.km||0));renderAll();
   });
-  unsubs.maint = onSnapshot(collection(db, `${base}/maint`), snap => {
-    state.currentCarMaint = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    state.currentCarMaint.sort((a, b) => (a.km||0) - (b.km||0));
-    renderAll();
+  unsubs.maint=onSnapshot(collection(db,`${base}/maint`),snap=>{
+    state.currentCarMaint=snap.docs.map(d=>({id:d.id,...d.data()}));
+    state.currentCarMaint.sort((a,b)=>(a.km||0)-(b.km||0));renderAll();
   });
-  unsubs.drs = onSnapshot(collection(db, `${base}/dateReminders`), snap => {
-    state.currentCarDRs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    state.currentCarDRs.sort((a, b) => (a.expiry||'').localeCompare(b.expiry||''));
-    renderAll();
+  unsubs.drs=onSnapshot(collection(db,`${base}/dateReminders`),snap=>{
+    state.currentCarDRs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    state.currentCarDRs.sort((a,b)=>(a.expiry||'').localeCompare(b.expiry||''));renderAll();
   });
 }
-
-function stopCarListeners() {
-  ['fuel','maint','drs'].forEach(k => { if (unsubs[k]) { unsubs[k](); unsubs[k] = null; } });
-  state.currentCarFuel = []; state.currentCarMaint = []; state.currentCarDRs = [];
+function stopCarListeners(){
+  ['fuel','maint','drs'].forEach(k=>{if(unsubs[k]){unsubs[k]();unsubs[k]=null;}});
+  state.currentCarFuel=[];state.currentCarMaint=[];state.currentCarDRs=[];
 }
-
-function listenToMembers() {
-  if (unsubs.members) unsubs.members();
-  unsubs.members = onSnapshot(collection(db, `${ORG}/members`), snap => {
-    state.members = snap.docs.map(d => ({ ...d.data(), uid: d.id }));
-    renderMemberList();
+function listenToMembers(){
+  if(unsubs.members)unsubs.members();
+  unsubs.members=onSnapshot(collection(db,`${ORG}/members`),snap=>{
+    state.members=snap.docs.map(d=>({...d.data(),uid:d.id}));renderMemberList();
   });
 }
 
 // ── HELPERS ───────────────────────────────────────────
-function today() { return new Date().toISOString().split('T')[0]; }
-function currentCar() {
-  const c = state.cars.find(c => c.id === state.currentCarId);
-  if (!c) return null;
-  return { ...c, fuel: state.currentCarFuel, maint: state.currentCarMaint, dateReminders: state.currentCarDRs };
+function today(){return new Date().toISOString().split('T')[0];}
+function currentCar(){
+  const c=state.cars.find(c=>c.id===state.currentCarId);
+  if(!c)return null;
+  return{...c,fuel:state.currentCarFuel,maint:state.currentCarMaint,dateReminders:state.currentCarDRs};
 }
-function canDelete(r) {
-  if (!state.currentMember) return false;
-  if (state.currentMember.role === 'admin') return true;
-  return r.addedBy === state.currentMember.displayName;
+function canDelete(r){
+  if(!state.currentMember)return false;
+  if(state.currentMember.role==='admin')return true;
+  return r.addedBy===state.currentMember.displayName;
 }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── DATE HELPERS (v5) ─────────────────────────────────
+function openPicker(fieldId) {
+  const hidden=document.getElementById(fieldId+'-hidden');
+  try{hidden.showPicker();}catch(e){hidden.click();}
+  hidden.onchange=()=>{
+    const[y,m,d]=hidden.value.split('-');
+    document.getElementById(fieldId).value=`${d}/${m}/${y.slice(2)}`;
+  };
+}
+function parseDate(input){
+  if(!input)return null;
+  const s=input.trim().replace(/[\s\-\.]/g,'/');
+  const parts=s.split('/');
+  if(parts.length!==3)return null;
+  let[d,m,y]=parts.map(Number);
+  if(y<100)y+=2000;
+  if(!d||!m||!y||m>12||d>31)return null;
+  return`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+function setTodayDate(fieldId){
+  const now=new Date();
+  document.getElementById(fieldId).value=
+    `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(2)}`;
+}
 
 // ── CAR MANAGEMENT ────────────────────────────────────
-function selectCar(id) {
-  if (id === state.currentCarId) return;
-  state.currentCarId = id;
-  listenToCarData(id);
-}
-async function addCar() {
-  const plate = document.getElementById('new-plate').value.trim().toUpperCase();
-  const model = document.getElementById('new-model').value.trim();
-  if (!plate) { alert('请填写车牌号'); return; }
-  try {
-    const ref = await addDoc(collection(db, `${ORG}/cars`), { plate, model, createdAt: serverTimestamp(), createdBy: state.currentMember.displayName });
-    document.getElementById('new-plate').value = '';
-    document.getElementById('new-model').value = '';
-    if (!state.currentCarId) { state.currentCarId = ref.id; listenToCarData(ref.id); }
+function selectCar(id){if(id===state.currentCarId)return;state.currentCarId=id;listenToCarData(id);}
+async function addCar(){
+  const plate=document.getElementById('new-plate').value.trim().toUpperCase();
+  const model=document.getElementById('new-model').value.trim();
+  if(!plate){alert('请填写车牌号');return;}
+  try{
+    const ref=await addDoc(collection(db,`${ORG}/cars`),{plate,model,createdAt:serverTimestamp(),createdBy:state.currentMember.displayName});
+    document.getElementById('new-plate').value='';document.getElementById('new-model').value='';
+    if(!state.currentCarId){state.currentCarId=ref.id;listenToCarData(ref.id);}
     renderCarList();
-  } catch(e) { alert('添加失败: '+e.message); }
+  }catch(e){alert('添加失败: '+e.message);}
 }
-async function deleteCar(id) {
-  if (!confirm('确认删除该车辆？')) return;
-  try {
-    await deleteDoc(doc(db, `${ORG}/cars`, id));
-    if (state.currentCarId === id) {
-      const next = state.cars.find(c => c.id !== id);
-      state.currentCarId = next ? next.id : null;
-      if (state.currentCarId) listenToCarData(state.currentCarId); else stopCarListeners();
-    }
+async function deleteCar(id){
+  if(!confirm('确认删除该车辆？'))return;
+  try{
+    await deleteDoc(doc(db,`${ORG}/cars`,id));
+    if(state.currentCarId===id){const next=state.cars.find(c=>c.id!==id);state.currentCarId=next?next.id:null;if(state.currentCarId)listenToCarData(state.currentCarId);else stopCarListeners();}
     renderCarList();
-  } catch(e) { alert('删除失败: '+e.message); }
+  }catch(e){alert('删除失败: '+e.message);}
 }
-function renderCarSel() {
-  const sel = document.getElementById('car-sel');
-  if (!state.cars.length) { sel.innerHTML='<option value="">— 请先添加车辆 —</option>'; return; }
-  sel.innerHTML = state.cars.map(c =>
-    `<option value="${c.id}"${c.id===state.currentCarId?' selected':''}>${esc(c.plate)}${c.model?' · '+esc(c.model):''}</option>`
-  ).join('');
+function renderCarSel(){
+  const sel=document.getElementById('car-sel');
+  if(!state.cars.length){sel.innerHTML='<option value="">— 请先添加车辆 —</option>';return;}
+  sel.innerHTML=state.cars.map(c=>`<option value="${c.id}"${c.id===state.currentCarId?' selected':''}>${esc(c.plate)}${c.model?' · '+esc(c.model):''}</option>`).join('');
 }
-function renderCarList() {
-  const el = document.getElementById('car-list');
-  if (!state.cars.length) { el.innerHTML='<div class="empty">暂无车辆</div>'; return; }
-  el.innerHTML = state.cars.map(c =>
-    `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
-      <div><div style="font-weight:500;font-size:13px">${esc(c.plate)}</div><div style="font-size:11px;color:var(--text3)">${esc(c.model||'未填写型号')}</div></div>
-      <button class="btn btn-sm btn-danger" onclick="deleteCar('${c.id}')">删除</button></div>`
-  ).join('');
+function renderCarList(){
+  const el=document.getElementById('car-list');
+  if(!state.cars.length){el.innerHTML='<div class="empty">暂无车辆</div>';return;}
+  el.innerHTML=state.cars.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
+    <div><div style="font-weight:500;font-size:13px">${esc(c.plate)}</div><div style="font-size:11px;color:var(--text3)">${esc(c.model||'未填写型号')}</div></div>
+    <button class="btn btn-sm btn-danger" onclick="deleteCar('${c.id}')">删除</button></div>`).join('');
 }
-function showCarModal() { renderCarList(); document.getElementById('car-modal').style.display='flex'; }
-function hideCarModal() { document.getElementById('car-modal').style.display='none'; }
+function showCarModal(){renderCarList();document.getElementById('car-modal').style.display='flex';}
+function hideCarModal(){document.getElementById('car-modal').style.display='none';}
 
 // ── FUEL ──────────────────────────────────────────────
-async function addFuel() {
-  const car = currentCar(); if (!car) { alert('请先选择或添加车辆'); return; }
-  const date=document.getElementById('f-date').value;
+async function addFuel(){
+  const car=currentCar();if(!car){alert('请先选择或添加车辆');return;}
+  const date=parseDate(document.getElementById('f-date').value);
+  if(!date){alert('日期格式不正确，请输入 DD/MM/YY');return;}
   const km=parseFloat(document.getElementById('f-km').value);
   const liters=parseFloat(document.getElementById('f-liters').value);
   const price=parseFloat(document.getElementById('f-price').value);
@@ -648,40 +757,40 @@ async function addFuel() {
   const type=document.getElementById('f-type').value;
   const note=document.getElementById('f-note').value;
   const notFull=document.getElementById('f-notfull').checked;
-  if (!date||!km||!liters||!price) { alert('请填写日期、里程、升数和单价'); return; }
-  try {
-    await addDoc(collection(db,`${ORG}/cars/${car.id}/fuel`), {
+  if(!km||!liters||!price){alert('请填写里程、升数和单价');return;}
+  try{
+    await addDoc(collection(db,`${ORG}/cars/${car.id}/fuel`),{
       date,km,liters,price,station,type,note,notFull,
       total:+(liters*price).toFixed(2),
-      addedBy:state.currentMember.displayName, addedAt:serverTimestamp()
+      addedBy:state.currentMember.displayName,addedAt:serverTimestamp()
     });
     ['f-km','f-liters','f-price','f-station','f-note'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('f-notfull').checked=false;
     document.getElementById('fuel-total-preview').textContent='';
-    document.getElementById('f-date').value=today();
-  } catch(e) { alert('添加失败: '+e.message); }
+    setTodayDate('f-date');
+  }catch(e){alert('添加失败: '+e.message);}
 }
-async function deleteFuel(id) {
-  const car=currentCar(); if (!car) return;
+async function deleteFuel(id){
+  const car=currentCar();if(!car)return;
   const r=state.currentCarFuel.find(r=>r.id===id);
-  if (!r||!canDelete(r)) { alert('无权限删除此记录'); return; }
-  if (!confirm('确认删除此条加油记录？')) return;
-  try { await deleteDoc(doc(db,`${ORG}/cars/${car.id}/fuel`,id)); } catch(e) { alert('删除失败: '+e.message); }
+  if(!r||!canDelete(r)){alert('无权限删除此记录');return;}
+  if(!confirm('确认删除此条加油记录？'))return;
+  try{await deleteDoc(doc(db,`${ORG}/cars/${car.id}/fuel`,id));}catch(e){alert('删除失败: '+e.message);}
 }
-function updatePreview() {
+function updatePreview(){
   const l=parseFloat(document.getElementById('f-liters').value)||0;
   const p=parseFloat(document.getElementById('f-price').value)||0;
   const el=document.getElementById('fuel-total-preview');
-  if(l&&p) el.textContent=`总计 RM ${(l*p).toFixed(2)}`; else el.textContent='';
+  if(l&&p)el.textContent=`总计 RM ${(l*p).toFixed(2)}`;else el.textContent='';
 }
-function renderFuelList() {
-  const c=currentCar(); const fuel=c?[...c.fuel].reverse():[];
+function renderFuelList(){
+  const c=currentCar();const fuel=c?[...c.fuel].reverse():[];
   const el=document.getElementById('fuel-list');
   if(!fuel.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
   el.innerHTML=fuel.map(r=>{
     const del=canDelete(r)?`<button class="btn btn-sm btn-danger" onclick="deleteFuel('${r.id}')" style="margin-left:6px;flex-shrink:0">删</button>`:'';
     const by=r.addedBy?` · 由 ${esc(r.addedBy)} 添加`:'';
-    return `<div class="rec"><div class="rec-icon ri-fuel">⛽</div>
+    return`<div class="rec"><div class="rec-icon ri-fuel">⛽</div>
     <div class="rec-body"><div class="rec-top">
       <span class="rec-name">${esc(r.station)} · <span class="badge bf">${r.type}</span>${r.notFull?' <span class="badge bnf">未加满</span>':''}</span>
       <span class="rec-amt">RM ${r.total.toFixed(2)}</span></div>
@@ -691,52 +800,54 @@ function renderFuelList() {
 }
 
 // ── MAINTENANCE ───────────────────────────────────────
-async function addMaint() {
-  const car=currentCar(); if(!car){alert('请先选择或添加车辆');return;}
-  const date=document.getElementById('m-date').value;
+async function addMaint(){
+  const car=currentCar();if(!car){alert('请先选择或添加车辆');return;}
+  const date=parseDate(document.getElementById('m-date').value);
+  if(!date){alert('日期格式不正确，请输入 DD/MM/YY');return;}
   const km=parseFloat(document.getElementById('m-km').value);
+  if(!km){alert('请填写当前里程');return;}
   const type=document.getElementById('m-type').value;
   const cost=parseFloat(document.getElementById('m-cost').value)||0;
   const nextKm=parseFloat(document.getElementById('m-next-km').value)||null;
   const shop=document.getElementById('m-shop').value||'未填写';
   const note=document.getElementById('m-note').value;
-  if(!date||!km){alert('请填写日期和里程');return;}
-  try {
+  try{
     await addDoc(collection(db,`${ORG}/cars/${car.id}/maint`),{
       date,km,type,cost,nextKm,shop,note,
-      addedBy:state.currentMember.displayName, addedAt:serverTimestamp()
+      attachments:[...pendingAttach.m],
+      addedBy:state.currentMember.displayName,addedAt:serverTimestamp()
     });
     ['m-km','m-cost','m-next-km','m-shop','m-note'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('m-date').value=today();
-  } catch(e) { alert('添加失败: '+e.message); }
+    setTodayDate('m-date');
+    clearAttach('m');
+  }catch(e){alert('添加失败: '+e.message);}
 }
-async function deleteMaint(id) {
-  const car=currentCar(); if(!car)return;
+async function deleteMaint(id){
+  const car=currentCar();if(!car)return;
   const r=state.currentCarMaint.find(r=>r.id===id);
   if(!r||!canDelete(r)){alert('无权限删除此记录');return;}
   if(!confirm('确认删除此条保养记录？'))return;
-  try { await deleteDoc(doc(db,`${ORG}/cars/${car.id}/maint`,id)); } catch(e){alert('删除失败: '+e.message);}
+  try{await deleteDoc(doc(db,`${ORG}/cars/${car.id}/maint`,id));}catch(e){alert('删除失败: '+e.message);}
 }
-function autoNextKm() {
+function autoNextKm(){
   const km=parseFloat(document.getElementById('m-km').value)||0;
   const t=document.getElementById('m-type').value;
-  const iv={'机油更换':5000,'机油滤芯':5000,'空气滤芯':15000,'火花塞':30000,'变速箱油':40000,'Gearbox Oil':40000,'定期保养':10000,'刹车油':40000,'冷却液':40000,'轮胎更换':60000};
-  if(iv[t]&&km) document.getElementById('m-next-km').value=km+iv[t];
+  if(MAINT_INTERVALS[t]&&km)document.getElementById('m-next-km').value=km+MAINT_INTERVALS[t];
 }
-function renderMaintList() {
-  const c=currentCar(); const maint=c?[...c.maint].reverse():[];
+function renderMaintList(){
+  const c=currentCar();const maint=c?[...c.maint].reverse():[];
   const el=document.getElementById('maint-list');
   if(!maint.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
   el.innerHTML=maint.map(r=>{
     const del=canDelete(r)?`<button class="btn btn-sm btn-danger" onclick="deleteMaint('${r.id}')" style="margin-left:6px;flex-shrink:0">删</button>`:'';
     const by=r.addedBy?` · 由 ${esc(r.addedBy)} 添加`:'';
-    return `<div class="rec"><div class="rec-icon ri-maint">🔧</div>
+    return`<div class="rec"><div class="rec-icon ri-maint">🔧</div>
     <div class="rec-body"><div class="rec-top">
       <span class="rec-name">${esc(r.type)}</span>
       <span class="rec-amt">${r.cost>0?'RM '+r.cost.toFixed(2):'免费'}</span></div>
     <div class="rec-meta">${r.date} · ${r.km.toLocaleString()} km · ${esc(r.shop)}${r.nextKm?' · 下次：'+r.nextKm.toLocaleString()+' km':''}${by}</div>
-    ${r.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(r.note)}</div>`:''}</div>
-    ${del}</div>`;
+    ${r.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(r.note)}</div>`:''}
+    ${renderAttachments(r.attachments)}</div>${del}</div>`;
   }).join('');
 }
 
@@ -744,39 +855,41 @@ function renderMaintList() {
 const DR_ICONS={roadtax:'🛂',insurance:'🛡️',puspakom:'🔍',service:'⚙️',tyre:'🛞',other:'📅'};
 const DR_NAMES={roadtax:'Road Tax',insurance:'Insurance',puspakom:'Puspakom 验车',service:'定期服务',tyre:'轮胎更换',other:'其他提醒'};
 
-async function addDateReminder() {
-  const car=currentCar(); if(!car){alert('请先选择车辆');return;}
+async function addDateReminder(){
+  const car=currentCar();if(!car){alert('请先选择车辆');return;}
   const type=document.getElementById('dr-type').value;
-  const expiry=document.getElementById('dr-expiry').value;
+  const expiry=parseDate(document.getElementById('dr-expiry').value);
+  if(!expiry){alert('日期格式不正确，请输入 DD/MM/YY');return;}
   const warnDays=parseInt(document.getElementById('dr-warn-days').value)||30;
   const cost=parseFloat(document.getElementById('dr-cost').value)||0;
   const note=document.getElementById('dr-note').value;
-  if(!expiry){alert('请填写到期日期');return;}
-  try {
+  try{
     const existing=state.currentCarDRs.filter(r=>r.type===type);
     await Promise.all(existing.map(r=>deleteDoc(doc(db,`${ORG}/cars/${car.id}/dateReminders`,r.id))));
     await addDoc(collection(db,`${ORG}/cars/${car.id}/dateReminders`),{
       type,expiry,warnDays,cost,note,
-      addedBy:state.currentMember.displayName, addedAt:serverTimestamp()
+      attachments:[...pendingAttach.dr],
+      addedBy:state.currentMember.displayName,addedAt:serverTimestamp()
     });
     ['dr-expiry','dr-cost','dr-note'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('dr-warn-days').value=30;
-  } catch(e){alert('添加失败: '+e.message);}
+    clearAttach('dr');
+  }catch(e){alert('添加失败: '+e.message);}
 }
-async function deleteDR(id) {
-  const car=currentCar(); if(!car)return;
+async function deleteDR(id){
+  const car=currentCar();if(!car)return;
   const r=state.currentCarDRs.find(r=>r.id===id);
   if(!r||!canDelete(r)){alert('无权限删除此记录');return;}
   if(!confirm('确认删除此条日期提醒？'))return;
-  try { await deleteDoc(doc(db,`${ORG}/cars/${car.id}/dateReminders`,id)); } catch(e){alert('删除失败: '+e.message);}
+  try{await deleteDoc(doc(db,`${ORG}/cars/${car.id}/dateReminders`,id));}catch(e){alert('删除失败: '+e.message);}
 }
-function getDRStatus(expiry) {
-  const now=new Date(); now.setHours(0,0,0,0);
-  const exp=new Date(expiry); exp.setHours(0,0,0,0);
+function getDRStatus(expiry){
+  const now=new Date();now.setHours(0,0,0,0);
+  const exp=new Date(expiry);exp.setHours(0,0,0,0);
   return Math.round((exp-now)/(864e5));
 }
-function renderDRList() {
-  const c=currentCar(); const drs=c?c.dateReminders:[];
+function renderDRList(){
+  const c=currentCar();const drs=c?c.dateReminders:[];
   const el=document.getElementById('dr-list');
   if(!drs.length){el.innerHTML='<div class="empty">暂无日期提醒</div>';return;}
   el.innerHTML=drs.map(r=>{
@@ -786,16 +899,16 @@ function renderDRList() {
     const tag=expired?'已过期':warn?'即将到期':'正常';
     const del=canDelete(r)?`<button class="btn btn-sm btn-danger" onclick="deleteDR('${r.id}')" style="margin-left:6px;flex-shrink:0">删</button>`:'';
     const by=r.addedBy?` · 由 ${esc(r.addedBy)} 添加`:'';
-    return `<div class="rec"><div class="rec-icon ri-date">${DR_ICONS[r.type]||'📅'}</div>
+    return`<div class="rec"><div class="rec-icon ri-date">${DR_ICONS[r.type]||'📅'}</div>
     <div class="rec-body"><div class="rec-top">
       <span class="rec-name">${DR_NAMES[r.type]||esc(r.type)}</span>
       <span class="rec-amt" style="color:${col}">${tag}</span></div>
     <div class="rec-meta">到期：${r.expiry} · 提前 ${r.warnDays} 天提醒${r.cost>0?' · RM '+r.cost.toFixed(0):''}${by}</div>
-    ${r.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(r.note)}</div>`:''}</div>
-    ${del}</div>`;
+    ${r.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(r.note)}</div>`:''}
+    ${renderAttachments(r.attachments)}</div>${del}</div>`;
   }).join('');
 }
-function renderDRDash() {
+function renderDRDash(){
   const c=currentCar();
   const drs=c?[...c.dateReminders].sort((a,b)=>(a.expiry||'').localeCompare(b.expiry||'')):[];
   const el=document.getElementById('date-reminders-dash');
@@ -805,34 +918,136 @@ function renderDRDash() {
     const expired=days<0,warn=days>=0&&days<=r.warnDays;
     const col=expired?'var(--red)':warn?'var(--accent)':'var(--green)';
     const st=expired?`已过期 ${Math.abs(days)} 天`:days===0?'今天到期！':`还剩 ${days} 天`;
-    return `<div class="dr-item"><div class="dr-left">
+    return`<div class="dr-item"><div class="dr-left">
       <div class="dr-icon">${DR_ICONS[r.type]||'📅'}</div>
       <div><div class="dr-name">${DR_NAMES[r.type]||esc(r.type)}</div><div class="dr-sub">到期：${r.expiry}</div></div></div>
       <div class="dr-right"><div class="dr-status" style="color:${col}">${st}</div></div></div>`;
   }).join('');
 }
 
+// ── CLOUDINARY UPLOAD ─────────────────────────────────
+async function compressImage(file){
+  if(file.type==='application/pdf')return file;
+  return new Promise(resolve=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=1200;let[w,h]=[img.width,img.height];
+        if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+        const canvas=document.createElement('canvas');
+        [canvas.width,canvas.height]=[w,h];
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        canvas.toBlob(blob=>resolve(blob),'image/jpeg',0.80);
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function handleUpload(prefix,input){
+  const files=Array.from(input.files);
+  const preview=document.getElementById(`${prefix}-attach-preview`);
+  for(const file of files){
+    const tid='tmp_'+Date.now()+Math.random().toString(36).slice(2);
+    preview.insertAdjacentHTML('beforeend',`<div id="${tid}" style="font-size:11px;color:var(--text3);margin-top:4px">⏳ ${esc(file.name)}</div>`);
+    try{
+      const compressed=await compressImage(file);
+      const fd=new FormData();
+      fd.append('file',compressed);fd.append('upload_preset',CLOUDINARY_PRESET);fd.append('folder','autolog');
+      const res=await fetch(CLOUDINARY_URL,{method:'POST',body:fd});
+      const data=await res.json();
+      const url=data.secure_url;
+      pendingAttach[prefix].push(url);
+      document.getElementById(tid).outerHTML=
+        `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+          <a href="${url}" target="_blank" style="font-size:11px;color:var(--blue)">${esc(file.name)}</a>
+          <button type="button" onclick="removeAttach('${prefix}','${url}',this)"
+            style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;line-height:1">×</button>
+        </div>`;
+    }catch{document.getElementById(tid).textContent=`❌ 上传失败：${file.name}`;}
+  }
+  input.value='';
+}
+function removeAttach(prefix,url,btn){
+  pendingAttach[prefix]=pendingAttach[prefix].filter(u=>u!==url);
+  btn.closest('div').remove();
+}
+function clearAttach(prefix){
+  pendingAttach[prefix]=[];
+  document.getElementById(`${prefix}-attach-preview`).innerHTML='';
+}
+function renderAttachments(urls){
+  if(!urls||!urls.length)return'';
+  return`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:5px">
+    ${urls.map((url,i)=>`<a href="${url}" target="_blank"
+      style="font-size:10px;color:var(--blue);background:rgba(64,144,232,.1);
+      border:1px solid rgba(64,144,232,.2);border-radius:4px;padding:2px 8px;text-decoration:none">
+      ${url.match(/\.(pdf)($|\?)/i)?'📄':'🖼️'} 附件${i+1}</a>`).join('')}</div>`;
+}
+
+// ── CUSTOM MAINT TYPES ────────────────────────────────
+function renderMaintTypeSelect(){
+  const sel=document.getElementById('m-type');
+  const cur=sel.value;
+  sel.innerHTML=[...DEFAULT_MAINT_TYPES,...customMaintTypes,'其他']
+    .map(t=>`<option value="${esc(t)}"${t===cur?' selected':''}>${esc(t)}</option>`).join('');
+}
+async function loadCustomMaintTypes(){
+  try{
+    const snap=await getDoc(doc(db,`${ORG}/custom-maint-types`,state.currentUser.uid));
+    customMaintTypes=snap.exists()?(snap.data().types||[]):[];
+  }catch{customMaintTypes=[];}
+  renderMaintTypeSelect();
+}
+async function saveCustomType(){
+  const name=document.getElementById('new-type-name').value.trim();
+  const interval=parseInt(document.getElementById('new-type-interval').value)||null;
+  if(!name){alert('请填写项目名称');return;}
+  if([...DEFAULT_MAINT_TYPES,...customMaintTypes].includes(name)){alert('项目已存在');return;}
+  customMaintTypes.push(name);
+  if(interval)MAINT_INTERVALS[name]=interval;
+  await setDoc(doc(db,`${ORG}/custom-maint-types`,state.currentUser.uid),{types:customMaintTypes});
+  renderMaintTypeSelect();renderCustomTypesList();
+  document.getElementById('new-type-name').value='';
+  document.getElementById('new-type-interval').value='';
+}
+async function deleteCustomType(name){
+  customMaintTypes=customMaintTypes.filter(t=>t!==name);
+  await setDoc(doc(db,`${ORG}/custom-maint-types`,state.currentUser.uid),{types:customMaintTypes});
+  renderMaintTypeSelect();renderCustomTypesList();
+}
+function renderCustomTypesList(){
+  const el=document.getElementById('custom-types-list');
+  el.innerHTML=customMaintTypes.length
+    ?customMaintTypes.map(t=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px">${esc(t)}</span>
+        <button class="btn btn-sm btn-danger" onclick="deleteCustomType('${esc(t).replace(/'/g,'&#39;')}')">删除</button>
+      </div>`).join('')
+    :'<div class="empty" style="padding:10px">暂无自定义项目</div>';
+}
+function showAddTypeModal(){renderCustomTypesList();document.getElementById('add-type-modal').style.display='flex';}
+
 // ── EFFICIENCY ────────────────────────────────────────
-function computeEfficiency(fuel) {
+function computeEfficiency(fuel){
   if(fuel.length<2)return[];
   const sorted=[...fuel].sort((a,b)=>a.km-b.km);
-  const res=[]; let pend=0,segStart=-1;
+  const res=[];let pend=0,segStart=-1;
   for(let i=0;i<sorted.length;i++){
     const r=sorted[i];
     if(i===0){if(r.notFull)pend+=r.liters;else{pend=0;segStart=i;}continue;}
     pend+=r.liters;
     if(!r.notFull){
-      const si=segStart>=0?segStart:0;
-      const dist=r.km-sorted[si].km;
-      if(dist>30) res.push({date:r.date,kmL:+(dist/pend).toFixed(2),dist,liters:+pend.toFixed(1),segments:i-si});
-      pend=0; segStart=i;
+      const si=segStart>=0?segStart:0;const dist=r.km-sorted[si].km;
+      if(dist>30)res.push({date:r.date,kmL:+(dist/pend).toFixed(2),dist,liters:+pend.toFixed(1),segments:i-si});
+      pend=0;segStart=i;
     }
   }
   return res;
 }
 
 // ── DASHBOARD ─────────────────────────────────────────
-function renderDashboard() {
+function renderDashboard(){
   const c=currentCar(),fuel=c?c.fuel:[],maint=c?c.maint:[];
   const now=new Date();
   const ym=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -849,7 +1064,7 @@ function renderDashboard() {
     if(d>0){el.className='trend up';el.textContent=`▲ ${p}% 较上月`;}
     else if(d<0){el.className='trend down';el.textContent=`▼ ${p}% 较上月`;}
     else{el.className='trend flat';el.textContent='与上月持平';}
-  } else document.getElementById('d-mfuel-trend').textContent='';
+  }else document.getElementById('d-mfuel-trend').textContent='';
   const effs=computeEfficiency(fuel);
   document.getElementById('d-avg').textContent=effs.length?(effs.reduce((s,e)=>s+e.kmL,0)/effs.length).toFixed(1):'—';
   if(effs.length>=2){
@@ -858,17 +1073,13 @@ function renderDashboard() {
     if(Math.abs(d)<0.2){el.className='trend flat';el.textContent='与上次持平';}
     else if(d>0){el.className='trend down';el.textContent=`▲ ${d.toFixed(1)} 效率提升 ✓`;}
     else{el.className='trend up';el.textContent=`▼ ${Math.abs(d).toFixed(1)} 效率下降`;}
-  } else document.getElementById('d-avg-trend').textContent='';
+  }else document.getElementById('d-avg-trend').textContent='';
   const allKm=[...fuel.map(r=>r.km),...maint.map(r=>r.km)];
   const maxKm=allKm.length?Math.max(...allKm):0,minKm=allKm.length?Math.min(...allKm):0;
   document.getElementById('d-km').textContent=maxKm?(maxKm-minKm).toLocaleString():'—';
-  renderMiniMonthly(fuel,maint);
-  renderMiniEff(effs);
-  renderReminders(maint,maxKm);
-  renderDRDash();
-  renderAlerts(maint,maxKm,c);
+  renderMiniMonthly(fuel,maint);renderMiniEff(effs);renderReminders(maint,maxKm);renderDRDash();renderAlerts(maint,maxKm,c);
 }
-function renderMiniMonthly(fuel,maint) {
+function renderMiniMonthly(fuel,maint){
   const el=document.getElementById('monthly-chart'),mo={};
   fuel.forEach(r=>{const m=r.date.slice(0,7);mo[m]=(mo[m]||{f:0,m:0});mo[m].f+=r.total;});
   maint.forEach(r=>{const m=r.date.slice(0,7);mo[m]=(mo[m]||{f:0,m:0});mo[m].m+=r.cost;});
@@ -877,43 +1088,41 @@ function renderMiniMonthly(fuel,maint) {
   const mx=Math.max(...keys.map(k=>mo[k].f+mo[k].m),1);
   el.innerHTML=keys.map(k=>{
     const d=mo[k],fp=Math.round(d.f/mx*100),mp=Math.round(d.m/mx*100);
-    return `<div class="bar-row"><span class="bar-name">${k.slice(5)}月</span>
+    return`<div class="bar-row"><span class="bar-name">${k.slice(5)}月</span>
     <div class="bar-track"><div style="position:absolute;top:0;left:0;height:9px;width:${fp}%;background:var(--accent);border-radius:2px 2px 0 0;transition:width .7s"></div>
     <div style="position:absolute;top:9px;left:0;height:9px;width:${mp}%;background:var(--blue);border-radius:0 0 2px 2px;transition:width .7s"></div></div>
     <span class="bar-val">RM ${(d.f+d.m).toFixed(0)}</span></div>`;
   }).join('')+'<div style="display:flex;gap:12px;margin-top:6px;font-size:10px;color:var(--text3)"><span style="color:var(--accent)">■ 油费</span><span style="color:var(--blue)">■ 保养</span></div>';
 }
-function renderMiniEff(effs) {
+function renderMiniEff(effs){
   const el=document.getElementById('eff-chart');
   if(!effs.length){el.innerHTML='<div class="empty">需2条满箱记录</div>';return;}
   const last6=effs.slice(-6),mx=Math.max(...last6.map(e=>e.kmL),1);
   el.innerHTML=last6.map(e=>{
-    const pct=Math.round(e.kmL/mx*100);
-    const col=e.kmL>=12?'var(--green)':e.kmL>=9?'var(--accent)':'var(--red)';
+    const pct=Math.round(e.kmL/mx*100),col=e.kmL>=12?'var(--green)':e.kmL>=9?'var(--accent)':'var(--red)';
     const lbl=e.segments>1?`${e.date.slice(5)} (${e.segments}次合并)`:e.date.slice(5);
-    return `<div class="eff-row"><span class="eff-date" style="width:100px;font-size:10px">${lbl}</span>
+    return`<div class="eff-row"><span class="eff-date" style="width:100px;font-size:10px">${lbl}</span>
     <div class="eff-track"><div class="eff-bar" style="width:${pct}%;background:${col}"></div></div>
     <span class="eff-val" style="color:${col}">${e.kmL} km/L</span></div>`;
   }).join('');
 }
-function renderReminders(maint,curKm) {
+function renderReminders(maint,curKm){
   const el=document.getElementById('reminders');
   const latest={};
   maint.filter(r=>r.nextKm).forEach(r=>{if(!latest[r.type]||r.nextKm>latest[r.type].nextKm)latest[r.type]={...r};});
   const list=Object.values(latest).map(r=>({...r,diff:r.nextKm-(curKm||0)})).sort((a,b)=>a.diff-b.diff).slice(0,6);
   if(!list.length){el.innerHTML='<div class="empty">暂无里程保养记录</div>';return;}
   el.innerHTML=list.map(i=>{
-    const ov=i.diff<0,sn=i.diff>=0&&i.diff<1000;
-    const col=ov?'var(--red)':sn?'var(--accent)':'var(--green)';
-    return `<div class="dr-item"><div class="dr-left">
+    const ov=i.diff<0,sn=i.diff>=0&&i.diff<1000,col=ov?'var(--red)':sn?'var(--accent)':'var(--green)';
+    return`<div class="dr-item"><div class="dr-left">
     <div class="dr-icon" style="background:rgba(64,144,232,.15);color:var(--blue)">🔧</div>
     <div><div class="dr-name">${esc(i.type)}</div><div class="dr-sub">${i.nextKm.toLocaleString()} km</div></div></div>
     <div class="dr-right"><div class="dr-status" style="color:${col}">${ov?'已超期':sn?'即将到期':'正常'}</div>
     <div class="dr-days">${ov?'超 '+Math.abs(i.diff)+'km':'剩 '+Math.max(0,i.diff)+'km'}</div></div></div>`;
   }).join('');
 }
-function renderAlerts(maint,curKm,car) {
-  const box=document.getElementById('alerts-box'); box.innerHTML='';
+function renderAlerts(maint,curKm,car){
+  const box=document.getElementById('alerts-box');box.innerHTML='';
   if(!car){box.innerHTML='<div class="alert ai">请点击「管理车辆」添加车辆，或联系管理员分配车辆给你</div>';return;}
   maint.filter(r=>r.nextKm).forEach(r=>{
     const d=r.nextKm-curKm;
@@ -929,7 +1138,7 @@ function renderAlerts(maint,curKm,car) {
 }
 
 // ── ANALYTICS ─────────────────────────────────────────
-function renderAnalytics() {
+function renderAnalytics(){
   const c=currentCar(),fuel=c?c.fuel:[],maint=c?c.maint:[];
   const tf=fuel.reduce((s,r)=>s+r.total,0),tm=maint.reduce((s,r)=>s+r.cost,0);
   document.getElementById('a-tfuel').textContent=tf?tf.toFixed(0):'—';
@@ -940,50 +1149,39 @@ function renderAnalytics() {
   document.getElementById('a-cpkm').textContent=(mx-mn)>0?((tf+tm)/(mx-mn)).toFixed(3):'—';
   const cb=document.getElementById('cost-breakdown');
   if(!tf&&!tm){cb.innerHTML='<div class="empty">暂无数据</div>';}
-  else{
-    const tot=tf+tm,fp=Math.round(tf/tot*100),mp=100-fp;
+  else{const tot=tf+tm,fp=Math.round(tf/tot*100),mp=100-fp;
     cb.innerHTML=`<div class="cost-bar"><div class="cb-fuel" style="flex:${fp}"></div><div class="cb-maint" style="flex:${mp}"></div></div>
-    <div class="cb-legend"><span style="color:var(--accent)">■ 油费 RM${tf.toFixed(0)} (${fp}%)</span><span style="color:var(--blue)">■ 保养 RM${tm.toFixed(0)} (${mp}%)</span></div>`;
-  }
+    <div class="cb-legend"><span style="color:var(--accent)">■ 油费 RM${tf.toFixed(0)} (${fp}%)</span><span style="color:var(--blue)">■ 保养 RM${tm.toFixed(0)} (${mp}%)</span></div>`;}
   const mo={};
   fuel.forEach(r=>{const m=r.date.slice(0,7);mo[m]=(mo[m]||{f:0,m:0});mo[m].f+=r.total;});
   maint.forEach(r=>{const m=r.date.slice(0,7);mo[m]=(mo[m]||{f:0,m:0});mo[m].m+=r.cost;});
   const mkeys=Object.keys(mo).sort().slice(-12);
   const md=document.getElementById('monthly-detail');
   if(!mkeys.length){md.innerHTML='<div class="empty">暂无数据</div>';}
-  else{
-    const mv=Math.max(...mkeys.map(k=>mo[k].f+mo[k].m),1);
-    md.innerHTML=mkeys.map(k=>{
-      const d=mo[k],tot=d.f+d.m,pct=Math.round(tot/mv*100),fp=Math.round(d.f/tot*100),mp=100-fp;
-      return `<div class="bar-row"><span class="bar-name" style="width:64px">${k}</span>
+  else{const mv=Math.max(...mkeys.map(k=>mo[k].f+mo[k].m),1);
+    md.innerHTML=mkeys.map(k=>{const d=mo[k],tot=d.f+d.m,pct=Math.round(tot/mv*100),fp=Math.round(d.f/tot*100),mp=100-fp;
+      return`<div class="bar-row"><span class="bar-name" style="width:64px">${k}</span>
       <div class="bar-track" style="height:22px"><div style="position:absolute;inset:0;width:${pct}%;display:flex;border-radius:4px;overflow:hidden">
       <div style="flex:${fp};background:var(--accent)"></div><div style="flex:${mp};background:var(--blue)"></div></div></div>
-      <span class="bar-val">RM ${tot.toFixed(0)}</span></div>`;
-    }).join('');
-  }
+      <span class="bar-val">RM ${tot.toFixed(0)}</span></div>`;}).join('');}
   const effs=computeEfficiency(fuel);
   const ed=document.getElementById('eff-detail');
   if(!effs.length){ed.innerHTML='<div class="empty">需至少2次满箱记录</div>';}
-  else{
-    const mx2=Math.max(...effs.map(e=>e.kmL),1);
+  else{const mx2=Math.max(...effs.map(e=>e.kmL),1);
     const avg=(effs.reduce((s,e)=>s+e.kmL,0)/effs.length).toFixed(1);
     const min=Math.min(...effs.map(e=>e.kmL)).toFixed(1),max=Math.max(...effs.map(e=>e.kmL)).toFixed(1);
     ed.innerHTML=`<div style="display:flex;gap:16px;margin-bottom:10px;font-size:12px">
       <span style="color:var(--text2)">平均 <strong style="color:var(--accent)">${avg} km/L</strong></span>
       <span style="color:var(--text2)">最佳 <strong style="color:var(--green)">${max}</strong></span>
       <span style="color:var(--text2)">最低 <strong style="color:var(--red)">${min}</strong></span></div>`
-    +effs.map(e=>{
-      const pct=Math.round(e.kmL/mx2*100),col=e.kmL>=12?'var(--green)':e.kmL>=9?'var(--accent)':'var(--red)';
+    +effs.map(e=>{const pct=Math.round(e.kmL/mx2*100),col=e.kmL>=12?'var(--green)':e.kmL>=9?'var(--accent)':'var(--red)';
       const ex=e.segments>1?` <span style="color:var(--text3);font-size:10px">(${e.segments}次合并·${e.liters}L/${e.dist}km)</span>`:'';
-      return `<div class="eff-row"><span class="eff-date">${e.date}</span>
+      return`<div class="eff-row"><span class="eff-date">${e.date}</span>
       <div class="eff-track"><div class="eff-bar" style="width:${pct}%;background:${col}"></div></div>
-      <span class="eff-val" style="color:${col}">${e.kmL} km/L${ex}</span></div>`;
-    }).join('');
-  }
+      <span class="eff-val" style="color:${col}">${e.kmL} km/L${ex}</span></div>`;}).join('');}
   const mb=document.getElementById('maint-breakdown');
   if(!maint.length){mb.innerHTML='<div class="empty">暂无保养记录</div>';return;}
-  const byT={};
-  maint.forEach(r=>{if(!byT[r.type])byT[r.type]={c:0,t:0};byT[r.type].c++;byT[r.type].t+=r.cost;});
+  const byT={};maint.forEach(r=>{if(!byT[r.type])byT[r.type]={c:0,t:0};byT[r.type].c++;byT[r.type].t+=r.cost;});
   const s2=Object.entries(byT).sort((a,b)=>b[1].t-a[1].t);
   const mx3=Math.max(...s2.map(([,v])=>v.t),1);
   mb.innerHTML=s2.map(([t,v])=>`<div class="bar-row"><span class="bar-name" style="width:90px;font-size:11px">${esc(t)}</span>
@@ -992,14 +1190,11 @@ function renderAnalytics() {
 }
 
 // ── ALL RECORDS ───────────────────────────────────────
-function renderAllRecords() {
+function renderAllRecords(){
   const c=currentCar();
   if(!c){document.getElementById('all-records').innerHTML='<div class="empty">请先选择车辆</div>';return;}
-  const all=[
-    ...c.fuel.map(r=>({...r,_t:'fuel'})),
-    ...c.maint.map(r=>({...r,_t:'maint'})),
-    ...c.dateReminders.map(r=>({...r,_t:'dr',date:r.expiry}))
-  ].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const all=[...c.fuel.map(r=>({...r,_t:'fuel'})),...c.maint.map(r=>({...r,_t:'maint'})),...c.dateReminders.map(r=>({...r,_t:'dr',date:r.expiry}))]
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
   const el=document.getElementById('all-records');
   if(!all.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
   el.innerHTML=all.map(r=>{
@@ -1009,42 +1204,38 @@ function renderAllRecords() {
     if(r._t==='maint')return`<div class="rec"><div class="rec-icon ri-maint">🔧</div>
       <div class="rec-body"><div class="rec-top"><span class="rec-name">${esc(r.type)}</span><span class="rec-amt">${r.cost>0?'RM '+r.cost.toFixed(2):'—'}</span></div>
       <div class="rec-meta">${r.date} · ${r.km.toLocaleString()} km · ${esc(r.shop)}${r.addedBy?' · 由 '+esc(r.addedBy)+' 添加':''}</div>
-      ${r.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(r.note)}</div>`:''}</div></div>`;
+      ${r.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(r.note)}</div>`:''}
+      ${renderAttachments(r.attachments)}</div></div>`;
     const days=getDRStatus(r.expiry);
     return`<div class="rec"><div class="rec-icon ri-date">${DR_ICONS[r.type]||'📅'}</div>
       <div class="rec-body"><div class="rec-top"><span class="rec-name">${DR_NAMES[r.type]||esc(r.type)} <span class="badge bp">日期提醒</span></span><span class="rec-amt" style="color:${days<0?'var(--red)':days<=r.warnDays?'var(--accent)':'var(--green)'}">${days<0?'已过期':days+'天后'}</span></div>
       <div class="rec-meta">到期：${r.expiry}${r.cost>0?' · RM '+r.cost.toFixed(0):''}${r.addedBy?' · 由 '+esc(r.addedBy)+' 添加':''}</div>
-      ${r.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(r.note)}</div>`:''}</div></div>`;
+      ${r.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${esc(r.note)}</div>`:''}
+      ${renderAttachments(r.attachments)}</div></div>`;
   }).join('');
 }
 
 // ── ADMIN ─────────────────────────────────────────────
-async function addMember() {
+async function addMember(){
   const email=document.getElementById('new-member-email').value.trim().toLowerCase();
   const displayName=document.getElementById('new-member-name').value.trim();
   const role=document.getElementById('new-member-role').value;
   if(!email||!displayName){alert('请填写 Gmail 和显示名称');return;}
-  try {
+  try{
     const key=btoa(email);
-    await setDoc(doc(db,`${ORG}/pending-members`,key),{
-      email,displayName,role,
-      assignedCars:role==='admin'?['all']:[],
-      addedAt:serverTimestamp()
-    });
+    await setDoc(doc(db,`${ORG}/pending-members`,key),{email,displayName,role,assignedCars:role==='admin'?['all']:[],addedAt:serverTimestamp()});
     alert(`已添加 ${displayName}，对方用 ${email} 登录 Google 后即可使用`);
-    document.getElementById('new-member-email').value='';
-    document.getElementById('new-member-name').value='';
-  } catch(e){alert('添加失败: '+e.message);}
+    document.getElementById('new-member-email').value='';document.getElementById('new-member-name').value='';
+  }catch(e){alert('添加失败: '+e.message);}
 }
-function renderMemberList() {
+function renderMemberList(){
   const el=document.getElementById('member-list');
   if(!state.members.length){el.innerHTML='<div class="empty">暂无成员</div>';return;}
   el.innerHTML=state.members.map(m=>{
     const isMe=m.uid===state.currentUser?.uid,isAdm=m.role==='admin';
     const assigned=m.assignedCars||[];
-    const carsText=assigned.includes('all')?'全部车辆':
-      assigned.length?assigned.map(id=>state.cars.find(c=>c.id===id)?.plate||id).join(' · '):'未分配';
-    return `<div class="member-row">
+    const carsText=assigned.includes('all')?'全部车辆':assigned.length?assigned.map(id=>state.cars.find(c=>c.id===id)?.plate||id).join(' · '):'未分配';
+    return`<div class="member-row">
       <div class="member-info">
         <div class="member-name">${esc(m.displayName)}${isMe?' <span style="color:var(--text3);font-size:11px">(你)</span>':''}</div>
         <div class="member-meta">${esc(m.email)} · ${isAdm?'管理员':'普通成员'} · ${carsText}</div>
@@ -1055,14 +1246,13 @@ function renderMemberList() {
       </div></div>`;
   }).join('');
 }
-function renderAdminPanel() { renderMemberList(); }
-async function deleteMember(uid) {
-  const m=state.members.find(m=>m.uid===uid);
-  if(!m)return;
+function renderAdminPanel(){renderMemberList();}
+async function deleteMember(uid){
+  const m=state.members.find(m=>m.uid===uid);if(!m)return;
   if(!confirm(`确认删除成员 ${m.displayName}？`))return;
   try{await deleteDoc(doc(db,`${ORG}/members`,uid));}catch(e){alert('删除失败: '+e.message);}
 }
-function showCarAssignModal(uid) {
+function showCarAssignModal(uid){
   const m=state.members.find(m=>m.uid===uid);if(!m)return;
   document.getElementById('car-assign-title').textContent=`为 ${m.displayName} 分配可访问车辆`;
   document.getElementById('car-assign-uid').value=uid;
@@ -1076,23 +1266,21 @@ function showCarAssignModal(uid) {
   document.getElementById('car-assign-modal').style.display='flex';
 }
 function hideCarAssignModal(){document.getElementById('car-assign-modal').style.display='none';}
-async function saveCarAssignment() {
+async function saveCarAssignment(){
   const uid=document.getElementById('car-assign-uid').value;
   const cbs=document.querySelectorAll('#car-assign-list input[type=checkbox]');
   const sel=Array.from(cbs).filter(cb=>cb.checked).map(cb=>cb.value);
-  try{
-    await updateDoc(doc(db,`${ORG}/members`,uid),{assignedCars:sel});
-    hideCarAssignModal();
-  }catch(e){alert('保存失败: '+e.message);}
+  try{await updateDoc(doc(db,`${ORG}/members`,uid),{assignedCars:sel});hideCarAssignModal();}
+  catch(e){alert('保存失败: '+e.message);}
 }
 
 // ── EXPORT ────────────────────────────────────────────
-function exportData() {
+function exportData(){
   const c=currentCar();if(!c){alert('请先选择车辆');return;}
-  const blob=new Blob([JSON.stringify({version:4,car:c,exported:new Date().toISOString()},null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({version:5,car:c,exported:new Date().toISOString()},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`autolog_${c.plate}_${today()}.json`;a.click();
 }
-function exportReport() {
+function exportReport(){
   const c=currentCar();if(!c){alert('请先选择车辆');return;}
   const fuel=c.fuel,maint=c.maint,drs=c.dateReminders;
   const tf=fuel.reduce((s,r)=>s+r.total,0),tm=maint.reduce((s,r)=>s+r.cost,0);
@@ -1128,42 +1316,49 @@ return`<tr><td>${DR_NAMES[r.type]||r.type}</td><td>${r.expiry}</td><td class="${
 ${[...fuel].reverse().map(r=>`<tr><td>${r.date}</td><td>${r.km.toLocaleString()} km</td><td>${r.liters}L${r.notFull?' ⚠️未满':''}</td><td>RM${r.price}</td><td>${r.station}</td><td>RM ${r.total.toFixed(2)}</td><td>${r.addedBy||'—'}</td></tr>`).join('')}</table>
 <h2>🔧 保养记录</h2><table><tr><th>日期</th><th>里程</th><th>项目</th><th>费用</th><th>下次里程</th><th>维修店</th><th>记录人</th></tr>
 ${[...maint].reverse().map(r=>`<tr><td>${r.date}</td><td>${r.km.toLocaleString()} km</td><td>${r.type}</td><td>${r.cost>0?'RM '+r.cost.toFixed(2):'—'}</td><td>${r.nextKm?r.nextKm.toLocaleString()+' km':'—'}</td><td>${r.shop}</td><td>${r.addedBy||'—'}</td></tr>`).join('')}</table>
-<div class="footer">由 AUTO LOG PRO v4 · Asas Wangi Fleet 生成 · ${new Date().toLocaleDateString('zh-MY')}</div></body></html>`;
+<div class="footer">AUTO LOG PRO v5.0 · Asas Wangi Fleet · ${new Date().toLocaleDateString('zh-MY')}</div></body></html>`;
   const blob=new Blob([html],{type:'text/html'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`autolog_report_${c.plate}_${today()}.html`;a.click();
 }
-async function clearCarData() {
+async function clearCarData(){
   if(state.currentMember?.role!=='admin'){alert('只有管理员可以清除车辆数据');return;}
   if(!confirm('清除本车所有加油/保养/日期提醒记录？此操作不可撤销！'))return;
   const c=currentCar();if(!c)return;
-  try {
+  try{
     const base=`${ORG}/cars/${c.id}`;
-    const [fs,ms,ds]=await Promise.all([getDocs(collection(db,`${base}/fuel`)),getDocs(collection(db,`${base}/maint`)),getDocs(collection(db,`${base}/dateReminders`))]);
+    const[fs,ms,ds]=await Promise.all([getDocs(collection(db,`${base}/fuel`)),getDocs(collection(db,`${base}/maint`)),getDocs(collection(db,`${base}/dateReminders`))]);
     await Promise.all([...fs.docs.map(d=>deleteDoc(d.ref)),...ms.docs.map(d=>deleteDoc(d.ref)),...ds.docs.map(d=>deleteDoc(d.ref))]);
     alert('已清除本车所有数据');
   }catch(e){alert('清除失败: '+e.message);}
 }
 
 // ── TAB ───────────────────────────────────────────────
-function switchTab(t) {
+function switchTab(t){
   document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===t));
   document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
   document.getElementById('panel-'+t)?.classList.add('active');
+  document.querySelectorAll('.bnav-btn[data-tab]').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===t));
   if(t==='analytics')renderAnalytics();
   if(t==='records')renderAllRecords();
   if(t==='daterem')renderDRList();
   if(t==='admin')renderAdminPanel();
 }
-function renderAll() {
-  renderCarSel();
-  renderFuelList();
-  renderMaintList();
-  renderDRList();
-  renderDashboard();
+function renderAll(){
+  renderCarSel();renderFuelList();renderMaintList();renderDRList();renderDashboard();
   const at=document.querySelector('.tab.active')?.dataset.tab;
   if(at==='analytics')renderAnalytics();
   if(at==='records')renderAllRecords();
 }
+
+// ── BOTTOM NAV ────────────────────────────────────────
+function toggleMoreMenu(){
+  const m=document.getElementById('more-menu');
+  m.style.display=m.style.display==='none'?'block':'none';
+}
+function closeMoreMenu(){document.getElementById('more-menu').style.display='none';}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#more-menu')&&!e.target.closest('#bnav-more-btn'))closeMoreMenu();
+});
 
 // ── EVENT LISTENERS ───────────────────────────────────
 document.getElementById('f-liters').addEventListener('input',updatePreview);
@@ -1171,13 +1366,40 @@ document.getElementById('f-price').addEventListener('input',updatePreview);
 document.getElementById('m-type').addEventListener('change',autoNextKm);
 document.getElementById('m-km').addEventListener('input',autoNextKm);
 
+// ── KM HINTS ──────────────────────────────────────────
+function attachKmHint(inputId,type){
+  document.getElementById(inputId).addEventListener('focus',()=>{
+    const car=currentCar();if(!car)return;
+    const records=type==='fuel'?car.fuel:car.maint;
+    if(!records.length)return;
+    const lastKm=Math.max(...records.map(r=>r.km));
+    let hint=document.getElementById(inputId+'-hint');
+    if(!hint){
+      hint=document.createElement('div');hint.id=inputId+'-hint';
+      hint.style.cssText='font-size:11px;color:var(--text3);margin-top:3px';
+      document.getElementById(inputId).insertAdjacentElement('afterend',hint);
+    }
+    hint.textContent=`上次记录：${lastKm.toLocaleString()} km`;
+  });
+}
+attachKmHint('f-km','fuel');
+attachKmHint('m-km','maint');
+
+// ── SERVICE WORKER ────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/asas-wangi-fleet/sw.js'));
+}
+
 // ── EXPOSE TO WINDOW ──────────────────────────────────
 Object.assign(window,{
   loginWithGoogle,doSignOut,selectCar,addCar,deleteCar,showCarModal,hideCarModal,
   addFuel,deleteFuel,addMaint,deleteMaint,autoNextKm,
   addDateReminder,deleteDR,switchTab,
   addMember,deleteMember,showCarAssignModal,hideCarAssignModal,saveCarAssignment,
-  exportData,exportReport,clearCarData
+  exportData,exportReport,clearCarData,
+  openPicker,toggleMoreMenu,closeMoreMenu,
+  showAddTypeModal,saveCustomType,deleteCustomType,
+  handleUpload,removeAttach
 });
 </script>
 </body>

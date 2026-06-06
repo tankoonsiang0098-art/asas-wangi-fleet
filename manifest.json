@@ -1,0 +1,15 @@
+{
+  "name": "AUTO LOG PRO — Asas Wangi",
+  "short_name": "AutoLog",
+  "description": "Asas Wangi 车队管理系统",
+  "start_url": "/asas-wangi-fleet/",
+  "scope": "/asas-wangi-fleet/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d0f12",
+  "theme_color": "#e8a020",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
