@@ -156,6 +156,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   .tabs{display:none;}
   .app{padding-bottom:75px;}
 }
+.suggest-wrap{position:relative;}
+.suggest-dropdown{
+  position:absolute;top:100%;left:0;right:0;z-index:200;
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:7px;margin-top:3px;max-height:180px;
+  overflow-y:auto;display:none;box-shadow:0 4px 16px rgba(0,0,0,.4);
+}
+.suggest-dropdown.open{display:block;}
+.suggest-item{
+  padding:9px 12px;font-size:13px;color:var(--text);cursor:pointer;
+  border-bottom:1px solid var(--border);
+}
+.suggest-item:last-child{border-bottom:none;}
+.suggest-item:hover{background:var(--bg4);}
+.suggest-arrow{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  color:var(--text3);font-size:12px;pointer-events:none;
+}
 </style>
 </head>
 <body>
@@ -253,7 +271,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
       <div class="fld"><label>当前里程 (km)</label><input type="number" id="f-km" placeholder="例：45230"></div>
       <div class="fld"><label>加油量 (升)</label><input type="number" id="f-liters" placeholder="例：40" step="0.1"></div>
       <div class="fld"><label>单价 (RM/升)</label><input type="number" id="f-price" placeholder="例：2.05" step="0.01"></div>
-      <div class="fld"><label>油站</label><input type="text" id="f-station" placeholder="例：Petronas" list="station-list" autocomplete="off"><datalist id="station-list"></datalist></div>
+      <div class="fld"><label>油站</label>
+        <div class="suggest-wrap">
+          <input type="text" id="f-station" placeholder="例：Petronas" autocomplete="off"
+            onfocus="openSuggest('f-station','station')"
+            oninput="filterSuggest('f-station','station')">
+          <span class="suggest-arrow">▼</span>
+          <div class="suggest-dropdown" id="suggest-station"></div>
+        </div>
+      </div>
       <div class="fld"><label>油品</label><select id="f-type"><option>RON95</option><option>RON97</option><option>柴油</option><option>其他</option></select></div>
     </div>
     <div class="toggle-row">
@@ -292,7 +318,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
       </div>
       <div class="fld"><label>费用 (RM)</label><input type="number" id="m-cost" placeholder="例：150" step="0.01"></div>
       <div class="fld"><label>下次保养里程 (km)</label><input type="number" id="m-next-km" placeholder="自动计算"></div>
-      <div class="fld"><label>维修店</label><input type="text" id="m-shop" placeholder="例：Honda Service Centre" list="shop-list" autocomplete="off"><datalist id="shop-list"></datalist></div>
+      <div class="fld"><label>维修店</label>
+        <div class="suggest-wrap">
+          <input type="text" id="m-shop" placeholder="例：Honda Service Centre" autocomplete="off"
+            onfocus="openSuggest('m-shop','shop')"
+            oninput="filterSuggest('m-shop','shop')">
+          <span class="suggest-arrow">▼</span>
+          <div class="suggest-dropdown" id="suggest-shop"></div>
+        </div>
+      </div>
     </div>
     <div class="fld" style="margin-top:8px"><label>备注</label><textarea id="m-note" placeholder="例：Castrol 5W-40"></textarea></div>
     <div class="fld" style="margin-top:8px">
@@ -417,7 +451,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
       <div class="fld"><label>当前里程 (km)</label><input type="number" id="ef-km"></div>
       <div class="fld"><label>加油量 (升)</label><input type="number" id="ef-liters" step="0.1"></div>
       <div class="fld"><label>单价 (RM/升)</label><input type="number" id="ef-price" step="0.01"></div>
-      <div class="fld"><label>油站</label><input type="text" id="ef-station" list="station-list" autocomplete="off"></div>
+      <div class="fld"><label>油站</label>
+        <div class="suggest-wrap">
+          <input type="text" id="ef-station" autocomplete="off"
+            onfocus="openSuggest('ef-station','station')"
+            oninput="filterSuggest('ef-station','station')">
+          <span class="suggest-arrow">▼</span>
+          <div class="suggest-dropdown" id="suggest-ef-station"></div>
+        </div>
+      </div>
       <div class="fld"><label>油品</label><select id="ef-type"><option>RON95</option><option>RON97</option><option>柴油</option><option>其他</option></select></div>
     </div>
     <div class="toggle-row" style="margin-top:8px">
@@ -425,6 +467,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
       <label class="toggle"><input type="checkbox" id="ef-notfull"><span class="toggle-slider"></span></label>
     </div>
     <div class="fld" style="margin-top:8px"><label>备注</label><textarea id="ef-note"></textarea></div>
+    <div class="fld" style="margin-top:8px">
+      <label>现有附件</label>
+      <div id="ef-attach-current" style="margin-bottom:6px"></div>
+      <label style="margin-top:6px">新增附件</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button type="button" class="btn btn-sm btn-ghost"
+          onclick="document.getElementById('ef-file-input').click()">📎 选择文件</button>
+        <span style="font-size:11px;color:var(--text3)">JPG · PNG · PDF</span>
+      </div>
+      <input type="file" id="ef-file-input" accept="image/*,.pdf" multiple
+        style="display:none" onchange="handleUpload('ef',this)">
+      <div id="ef-attach-preview" style="margin-top:6px"></div>
+    </div>
     <div class="divider"></div>
     <button class="btn btn-primary" onclick="saveEditFuel()" style="width:100%">保存修改</button>
   </div>
@@ -447,9 +502,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
       <div class="fld"><label>保养项目</label><select id="em-type"></select></div>
       <div class="fld"><label>费用 (RM)</label><input type="number" id="em-cost" step="0.01"></div>
       <div class="fld"><label>下次保养里程 (km)</label><input type="number" id="em-next-km"></div>
-      <div class="fld"><label>维修店</label><input type="text" id="em-shop" list="shop-list" autocomplete="off"></div>
+      <div class="fld"><label>维修店</label>
+        <div class="suggest-wrap">
+          <input type="text" id="em-shop" autocomplete="off"
+            onfocus="openSuggest('em-shop','shop')"
+            oninput="filterSuggest('em-shop','shop')">
+          <span class="suggest-arrow">▼</span>
+          <div class="suggest-dropdown" id="suggest-em-shop"></div>
+        </div>
+      </div>
     </div>
     <div class="fld" style="margin-top:8px"><label>备注</label><textarea id="em-note"></textarea></div>
+    <div class="fld" style="margin-top:8px">
+      <label>现有附件</label>
+      <div id="em-attach-current" style="margin-bottom:6px"></div>
+      <label style="margin-top:6px">新增附件</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button type="button" class="btn btn-sm btn-ghost"
+          onclick="document.getElementById('em-file-input').click()">📎 选择文件</button>
+        <span style="font-size:11px;color:var(--text3)">JPG · PNG · PDF</span>
+      </div>
+      <input type="file" id="em-file-input" accept="image/*,.pdf" multiple
+        style="display:none" onchange="handleUpload('em',this)">
+      <div id="em-attach-preview" style="margin-top:6px"></div>
+    </div>
     <div class="divider"></div>
     <button class="btn btn-primary" onclick="saveEditMaint()" style="width:100%">保存修改</button>
   </div>
@@ -569,7 +645,7 @@ const DEFAULT_MAINT_TYPES = [
   '变速箱油','冷却液','雨刮片','蓄电池','定期保养'
 ];
 let customMaintTypes = [];
-const pendingAttach = { m: [], dr: [] };
+const pendingAttach = { m: [], dr: [], ef: [], em: [] };
 
 let state = {
   currentCarId:null, cars:[], currentCarFuel:[], currentCarMaint:[], currentCarDRs:[],
@@ -1402,6 +1478,24 @@ function showEditFuelModal(id) {
   document.getElementById('ef-type').value = r.type;
   document.getElementById('ef-notfull').checked = r.notFull || false;
   document.getElementById('ef-note').value = r.note || '';
+  // 渲染现有附件（可删除）
+  let efCurrentUrls = [...(r.attachments || [])];
+  const efCurrentEl = document.getElementById('ef-attach-current');
+  function renderEfCurrent() {
+    efCurrentEl.innerHTML = efCurrentUrls.length
+      ? efCurrentUrls.map((url, i) =>
+          `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <a href="${url}" target="_blank" style="font-size:11px;color:var(--blue)">
+              ${url.match(/\.(pdf)($|\?)/i) ? '📄' : '🖼️'} 附件${i+1}</a>
+            <button type="button" onclick="efRemoveCurrent(${i})"
+              style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px">×</button>
+          </div>`).join('')
+      : '<div style="font-size:11px;color:var(--text3)">无附件</div>';
+  }
+  window.efRemoveCurrent = (i) => { efCurrentUrls.splice(i,1); renderEfCurrent(); };
+  renderEfCurrent();
+  clearAttach('ef');
+  window._efCurrentUrls = () => efCurrentUrls;
   document.getElementById('edit-fuel-modal').style.display = 'flex';
 }
 function hideEditFuelModal() { document.getElementById('edit-fuel-modal').style.display = 'none'; }
@@ -1421,9 +1515,11 @@ async function saveEditFuel() {
       type: document.getElementById('ef-type').value,
       notFull: document.getElementById('ef-notfull').checked,
       note: document.getElementById('ef-note').value,
-      total: +(liters * price).toFixed(2)
+      total: +(liters * price).toFixed(2),
+      attachments: [...window._efCurrentUrls(), ...pendingAttach.ef]
     });
     hideEditFuelModal();
+    clearAttach('ef');
   } catch(e) { alert('保存失败: ' + e.message); }
 }
 
@@ -1442,6 +1538,23 @@ function showEditMaintModal(id) {
   const sel = document.getElementById('em-type');
   sel.innerHTML = [...DEFAULT_MAINT_TYPES, ...customMaintTypes, '其他']
     .map(t => `<option value="${esc(t)}"${t === r.type ? ' selected' : ''}>${esc(t)}</option>`).join('');
+  let emCurrentUrls = [...(r.attachments || [])];
+  const emCurrentEl = document.getElementById('em-attach-current');
+  function renderEmCurrent() {
+    emCurrentEl.innerHTML = emCurrentUrls.length
+      ? emCurrentUrls.map((url, i) =>
+          `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <a href="${url}" target="_blank" style="font-size:11px;color:var(--blue)">
+              ${url.match(/\.(pdf)($|\?)/i) ? '📄' : '🖼️'} 附件${i+1}</a>
+            <button type="button" onclick="emRemoveCurrent(${i})"
+              style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px">×</button>
+          </div>`).join('')
+      : '<div style="font-size:11px;color:var(--text3)">无附件</div>';
+  }
+  window.emRemoveCurrent = (i) => { emCurrentUrls.splice(i,1); renderEmCurrent(); };
+  renderEmCurrent();
+  clearAttach('em');
+  window._emCurrentUrls = () => emCurrentUrls;
   document.getElementById('edit-maint-modal').style.display = 'flex';
 }
 function hideEditMaintModal() { document.getElementById('edit-maint-modal').style.display = 'none'; }
@@ -1459,20 +1572,47 @@ async function saveEditMaint() {
       cost: parseFloat(document.getElementById('em-cost').value) || 0,
       nextKm: parseFloat(document.getElementById('em-next-km').value) || null,
       shop: document.getElementById('em-shop').value || '未填写',
-      note: document.getElementById('em-note').value
+      note: document.getElementById('em-note').value,
+      attachments: [...window._emCurrentUrls(), ...pendingAttach.em]
     });
     hideEditMaintModal();
+    clearAttach('em');
   } catch(e) { alert('保存失败: ' + e.message); }
 }
 
 // ── SUGGESTIONS ──────────────────────────────────────
+let suggestData = { station: [], shop: [] };
 function refreshSuggestions() {
   const c = currentCar();
-  const stations = [...new Set((c?.fuel || []).map(r => r.station).filter(s => s && s !== '未填写'))];
-  const shops = [...new Set((c?.maint || []).map(r => r.shop).filter(s => s && s !== '未填写'))];
-  document.getElementById('station-list').innerHTML = stations.map(s => `<option value="${esc(s)}">`).join('');
-  document.getElementById('shop-list').innerHTML = shops.map(s => `<option value="${esc(s)}">`).join('');
+  suggestData.station = [...new Set((c?.fuel || []).map(r => r.station).filter(s => s && s !== '未填写'))];
+  suggestData.shop = [...new Set((c?.maint || []).map(r => r.shop).filter(s => s && s !== '未填写'))];
 }
+function openSuggest(inputId, type) {
+  closeSuggest();
+  const input = document.getElementById(inputId);
+  const dropdown = input.closest('.suggest-wrap')?.querySelector('.suggest-dropdown');
+  if (!dropdown) return;
+  const val = input.value.toLowerCase();
+  const items = suggestData[type].filter(s => !val || s.toLowerCase().includes(val));
+  if (!items.length) return;
+  dropdown.innerHTML = items.map(s =>
+    `<div class="suggest-item" onmousedown="selectSuggest('${inputId}','${esc(s)}')">${esc(s)}</div>`
+  ).join('');
+  dropdown.classList.add('open');
+}
+function filterSuggest(inputId, type) {
+  openSuggest(inputId, type);
+}
+function selectSuggest(inputId, val) {
+  document.getElementById(inputId).value = val;
+  closeSuggest();
+}
+function closeSuggest() {
+  document.querySelectorAll('.suggest-dropdown').forEach(d => d.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.suggest-wrap')) closeSuggest();
+});
 
 // ── TAB ───────────────────────────────────────────────
 function switchTab(t){
@@ -1544,7 +1684,8 @@ Object.assign(window,{
   showAddTypeModal,saveCustomType,deleteCustomType,
   handleUpload,removeAttach,
   showEditFuelModal,hideEditFuelModal,saveEditFuel,
-  showEditMaintModal,hideEditMaintModal,saveEditMaint
+  showEditMaintModal,hideEditMaintModal,saveEditMaint,
+  openSuggest,filterSuggest,selectSuggest
 });
 </script>
 </body>
