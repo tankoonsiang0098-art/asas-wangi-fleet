@@ -843,6 +843,16 @@ let customMaintTypes = [];
 const pendingAttach = { m: [], dr: [], ef: [], em: [], edr: [], f: [] };
 
 let maintFilter = 'all'; // 保养记录筛选状态
+const DR_ICONS_MAP={
+  roadtax:'🛂', insurance:'🛡️', puspakom:'🔍',
+  service:'⚙️', tyre:'🛞', grant:'📋', other:'📅'
+};
+const DR_ICONS = DR_ICONS_MAP;
+const DR_NAMES={
+  roadtax:'Road Tax', insurance:'Insurance',
+  puspakom:'Puspakom 验车', service:'定期服务',
+  tyre:'轮胎更换', grant:'车辆转让 Grant', other:'其他提醒'
+};
 let state = {
   currentCarId:null, cars:[], currentCarFuel:[], currentCarMaint:[], currentCarDRs:[],
   currentUser:null, currentMember:null, members:[]
@@ -1188,17 +1198,6 @@ function renderMaintList(){
   }).join('');
 }
 
-// ── DATE REMINDERS ────────────────────────────────────
-const DR_ICONS_MAP={
-  roadtax:'🛂', insurance:'🛡️', puspakom:'🔍',
-  service:'⚙️', tyre:'🛞', grant:'📋', other:'📅'
-};
-const DR_ICONS = DR_ICONS_MAP;
-const DR_NAMES={
-  roadtax:'Road Tax', insurance:'Insurance',
-  puspakom:'Puspakom 验车', service:'定期服务',
-  tyre:'轮胎更换', grant:'车辆转让 Grant', other:'其他提醒'
-};
 
 async function addDateReminder(){
   const car=currentCar();if(!car){alert('请先选择车辆');return;}
