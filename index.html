@@ -174,6 +174,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   position:absolute;right:8px;top:50%;transform:translateY(-50%);
   color:var(--text3);font-size:12px;pointer-events:none;
 }
+/* v5.3 语义化表单布局 */
+.fg-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.fg-row .fld { margin-bottom: 0; }
+.fg-date  { flex: 0 0 148px; }
+.fg-km    { flex: 1; min-width: 90px; }
+.fg-num   { flex: 1; min-width: 80px; }
+.fg-full  { width: 100%; }
+.fg-type  { flex: 1; min-width: 100px; }
+@media(max-width:400px) {
+  .fg-date { flex: 0 0 130px; }
+}
 </style>
 </head>
 <body>
@@ -216,7 +227,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.1</div>
+    <div class="hsub">Asas Wangi Fleet · v5.3</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -260,27 +271,37 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 <div class="panel" id="panel-fuel">
   <div class="card">
     <div class="card-title"><i class="ti ti-gas-station"></i> 添加加油记录</div>
-    <div class="fg">
-      <div class="fld"><label>日期</label>
+    <!-- 行1：日期 + 里程 -->
+    <div class="fg-row">
+      <div class="fld fg-date"><label>日期</label>
         <div style="display:flex;gap:6px;align-items:center">
           <input type="text" id="f-date" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
           <input type="date" id="f-date-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
           <button type="button" onclick="openPicker('f-date')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
         </div>
       </div>
-      <div class="fld"><label>当前里程 (km)</label><input type="number" id="f-km" placeholder="例：45230"></div>
-      <div class="fld"><label>加油量 (升)</label><input type="number" id="f-liters" placeholder="例：40" step="0.1"></div>
-      <div class="fld"><label>单价 (RM/升)</label><input type="number" id="f-price" placeholder="例：2.05" step="0.01"></div>
-      <div class="fld"><label>油站</label>
-        <div class="suggest-wrap">
-          <input type="text" id="f-station" placeholder="例：Petronas" autocomplete="off"
-            onfocus="openSuggest('f-station','station')"
-            oninput="filterSuggest('f-station','station')">
-          <span class="suggest-arrow">▼</span>
-          <div class="suggest-dropdown" id="suggest-station"></div>
-        </div>
+      <div class="fld fg-km"><label>里程 (km)</label><input type="number" id="f-km" placeholder="45230"></div>
+    </div>
+    <!-- 行2：升数 + 单价 -->
+    <div class="fg-row">
+      <div class="fld fg-num"><label>升数 (L)</label><input type="number" id="f-liters" placeholder="40" step="0.1"></div>
+      <div class="fld fg-num"><label>单价 (RM/L)</label><input type="number" id="f-price" placeholder="2.05" step="0.01"></div>
+    </div>
+    <!-- 行3：油站（全宽）-->
+    <div class="fld fg-full"><label>油站</label>
+      <div class="suggest-wrap">
+        <input type="text" id="f-station" placeholder="例：Petronas" autocomplete="off"
+          onfocus="openSuggest('f-station','station')"
+          oninput="filterSuggest('f-station','station')">
+        <span class="suggest-arrow">▼</span>
+        <div class="suggest-dropdown" id="suggest-station"></div>
       </div>
-      <div class="fld"><label>油品</label><select id="f-type"><option>RON95</option><option>RON97</option><option>柴油</option><option>其他</option></select></div>
+    </div>
+    <!-- 行4：油品 -->
+    <div class="fg-row" style="margin-top:8px">
+      <div class="fld fg-type"><label>油品</label>
+        <select id="f-type"><option>RON95</option><option>RON97</option><option>柴油</option><option>其他</option></select>
+      </div>
     </div>
     <div class="toggle-row">
       <div><div class="toggle-label">⚠️ 未加满油箱</div><div style="font-size:11px;color:var(--text3);margin-top:2px">勾选后此次不计入油耗，等下次加满再统一计算</div></div>
@@ -301,26 +322,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 <div class="panel" id="panel-maintenance">
   <div class="card">
     <div class="card-title"><i class="ti ti-tool"></i> 添加保养记录</div>
-    <div class="fg">
-      <div class="fld"><label>日期</label>
+    <!-- 行1：日期 + 里程 -->
+    <div class="fg-row">
+      <div class="fld fg-date"><label>日期</label>
         <div style="display:flex;gap:6px;align-items:center">
           <input type="text" id="m-date" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
           <input type="date" id="m-date-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
           <button type="button" onclick="openPicker('m-date')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
         </div>
       </div>
-      <div class="fld"><label>当前里程 (km)</label><input type="number" id="m-km" placeholder="例：45230"></div>
-      <div class="fld"><label>保养项目</label>
+      <div class="fld fg-km"><label>里程 (km)</label><input type="number" id="m-km" placeholder="45230"></div>
+    </div>
+    <!-- 行2：保养项目 + 费用 -->
+    <div class="fg-row">
+      <div class="fld fg-type" style="flex:2"><label>保养项目</label>
         <div style="display:flex;gap:6px">
           <select id="m-type" style="flex:1"></select>
           <button type="button" class="btn btn-sm btn-ghost" onclick="showAddTypeModal()" title="添加自定义项目">＋</button>
         </div>
       </div>
-      <div class="fld"><label>费用 (RM)</label><input type="number" id="m-cost" placeholder="例：150" step="0.01"></div>
-      <div class="fld"><label>下次保养里程 (km)</label><input type="number" id="m-next-km" placeholder="自动计算"></div>
-      <div class="fld"><label>维修店</label>
+      <div class="fld fg-num"><label>费用 (RM)</label><input type="number" id="m-cost" placeholder="150" step="0.01"></div>
+    </div>
+    <!-- 行3：下次里程 + 维修店 -->
+    <div class="fg-row">
+      <div class="fld fg-num"><label>下次 (km)</label><input type="number" id="m-next-km" placeholder="自动"></div>
+      <div class="fld fg-km"><label>维修店</label>
         <div class="suggest-wrap">
-          <input type="text" id="m-shop" placeholder="例：Honda Service Centre" autocomplete="off"
+          <input type="text" id="m-shop" placeholder="Honda Service Centre" autocomplete="off"
             onfocus="openSuggest('m-shop','shop')"
             oninput="filterSuggest('m-shop','shop')">
           <span class="suggest-arrow">▼</span>
@@ -438,29 +466,45 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 <!-- EDIT FUEL MODAL -->
 <div class="overlay" id="edit-fuel-modal" style="display:none">
   <div class="modal">
-    <div class="modal-title">编辑加油记录 <button class="close-btn" onclick="hideEditFuelModal()">×</button></div>
+    <div class="modal-title">
+      编辑加油记录
+      <button class="close-btn" onclick="hideEditFuelModal()"
+        style="width:36px;height:36px;border-radius:8px;background:var(--bg4);
+        border:1px solid var(--border2);color:var(--text);font-size:22px;
+        display:flex;align-items:center;justify-content:center">×</button>
+    </div>
     <input type="hidden" id="ef-id">
-    <div class="fg">
-      <div class="fld"><label>日期</label>
+    <!-- 行1：日期 + 里程 -->
+    <div class="fg-row">
+      <div class="fld fg-date"><label>日期</label>
         <div style="display:flex;gap:6px;align-items:center">
           <input type="text" id="ef-date" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
           <input type="date" id="ef-date-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
           <button type="button" onclick="openPicker('ef-date')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;font-size:14px">📅</button>
         </div>
       </div>
-      <div class="fld"><label>当前里程 (km)</label><input type="number" id="ef-km"></div>
-      <div class="fld"><label>加油量 (升)</label><input type="number" id="ef-liters" step="0.1"></div>
-      <div class="fld"><label>单价 (RM/升)</label><input type="number" id="ef-price" step="0.01"></div>
-      <div class="fld"><label>油站</label>
-        <div class="suggest-wrap">
-          <input type="text" id="ef-station" autocomplete="off"
-            onfocus="openSuggest('ef-station','station')"
-            oninput="filterSuggest('ef-station','station')">
-          <span class="suggest-arrow">▼</span>
-          <div class="suggest-dropdown" id="suggest-ef-station"></div>
-        </div>
+      <div class="fld fg-km"><label>里程 (km)</label><input type="number" id="ef-km"></div>
+    </div>
+    <!-- 行2：升数 + 单价 -->
+    <div class="fg-row">
+      <div class="fld fg-num"><label>升数 (L)</label><input type="number" id="ef-liters" step="0.1"></div>
+      <div class="fld fg-num"><label>单价 (RM/L)</label><input type="number" id="ef-price" step="0.01"></div>
+    </div>
+    <!-- 行3：油站（全宽）-->
+    <div class="fld fg-full" style="margin-bottom:8px"><label>油站</label>
+      <div class="suggest-wrap">
+        <input type="text" id="ef-station" autocomplete="off"
+          onfocus="openSuggest('ef-station','station')"
+          oninput="filterSuggest('ef-station','station')">
+        <span class="suggest-arrow">▼</span>
+        <div class="suggest-dropdown" id="suggest-ef-station"></div>
       </div>
-      <div class="fld"><label>油品</label><select id="ef-type"><option>RON95</option><option>RON97</option><option>柴油</option><option>其他</option></select></div>
+    </div>
+    <!-- 行4：油品 -->
+    <div class="fg-row">
+      <div class="fld fg-type"><label>油品</label>
+        <select id="ef-type"><option>RON95</option><option>RON97</option><option>柴油</option><option>其他</option></select>
+      </div>
     </div>
     <div class="toggle-row" style="margin-top:8px">
       <div><div class="toggle-label">⚠️ 未加满油箱</div></div>
@@ -481,28 +525,46 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
       <div id="ef-attach-preview" style="margin-top:6px"></div>
     </div>
     <div class="divider"></div>
-    <button class="btn btn-primary" onclick="saveEditFuel()" style="width:100%">保存修改</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="hideEditFuelModal()" style="flex:1">取消</button>
+      <button class="btn btn-primary" onclick="saveEditFuel()" style="flex:2">保存修改</button>
+    </div>
   </div>
 </div>
 
 <!-- EDIT MAINT MODAL -->
 <div class="overlay" id="edit-maint-modal" style="display:none">
   <div class="modal">
-    <div class="modal-title">编辑保养记录 <button class="close-btn" onclick="hideEditMaintModal()">×</button></div>
+    <div class="modal-title">
+      编辑保养记录
+      <button class="close-btn" onclick="hideEditMaintModal()"
+        style="width:36px;height:36px;border-radius:8px;background:var(--bg4);
+        border:1px solid var(--border2);color:var(--text);font-size:22px;
+        display:flex;align-items:center;justify-content:center">×</button>
+    </div>
     <input type="hidden" id="em-id">
-    <div class="fg">
-      <div class="fld"><label>日期</label>
+    <!-- 行1：日期 + 里程 -->
+    <div class="fg-row">
+      <div class="fld fg-date"><label>日期</label>
         <div style="display:flex;gap:6px;align-items:center">
           <input type="text" id="em-date" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
           <input type="date" id="em-date-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
           <button type="button" onclick="openPicker('em-date')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;font-size:14px">📅</button>
         </div>
       </div>
-      <div class="fld"><label>当前里程 (km)</label><input type="number" id="em-km"></div>
-      <div class="fld"><label>保养项目</label><select id="em-type"></select></div>
-      <div class="fld"><label>费用 (RM)</label><input type="number" id="em-cost" step="0.01"></div>
-      <div class="fld"><label>下次保养里程 (km)</label><input type="number" id="em-next-km"></div>
-      <div class="fld"><label>维修店</label>
+      <div class="fld fg-km"><label>里程 (km)</label><input type="number" id="em-km"></div>
+    </div>
+    <!-- 行2：保养项目 + 费用 -->
+    <div class="fg-row">
+      <div class="fld fg-type" style="flex:2"><label>保养项目</label>
+        <select id="em-type"></select>
+      </div>
+      <div class="fld fg-num"><label>费用 (RM)</label><input type="number" id="em-cost" step="0.01"></div>
+    </div>
+    <!-- 行3：下次里程 + 维修店 -->
+    <div class="fg-row">
+      <div class="fld fg-num"><label>下次 (km)</label><input type="number" id="em-next-km"></div>
+      <div class="fld fg-km"><label>维修店</label>
         <div class="suggest-wrap">
           <input type="text" id="em-shop" autocomplete="off"
             onfocus="openSuggest('em-shop','shop')"
@@ -527,7 +589,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
       <div id="em-attach-preview" style="margin-top:6px"></div>
     </div>
     <div class="divider"></div>
-    <button class="btn btn-primary" onclick="saveEditMaint()" style="width:100%">保存修改</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="hideEditMaintModal()" style="flex:1">取消</button>
+      <button class="btn btn-primary" onclick="saveEditMaint()" style="flex:2">保存修改</button>
+    </div>
   </div>
 </div>
 
@@ -1253,19 +1318,33 @@ function renderReminders(maint,curKm){
     <div class="dr-days">${ov?'超 '+Math.abs(i.diff)+'km':'剩 '+Math.max(0,i.diff)+'km'}</div></div></div>`;
   }).join('');
 }
-function renderAlerts(maint,curKm,car){
-  const box=document.getElementById('alerts-box');box.innerHTML='';
-  if(!car){box.innerHTML='<div class="alert ai">请点击「管理车辆」添加车辆，或联系管理员分配车辆给你</div>';return;}
-  maint.filter(r=>r.nextKm).forEach(r=>{
-    const d=r.nextKm-curKm;
-    if(d<0)box.innerHTML+=`<div class="alert ae">⚠️ ${esc(r.type)} 已超期 ${Math.abs(d)} km！请尽快保养</div>`;
-    else if(d<500)box.innerHTML+=`<div class="alert aw">🔔 ${esc(r.type)} 还剩 ${d} km 到期</div>`;
+function renderAlerts(maint, curKm, car) {
+  const box = document.getElementById('alerts-box');
+  box.innerHTML = '';
+  if (!car) {
+    box.innerHTML = '<div class="alert ai">请点击「管理车辆」添加车辆，或联系管理员分配车辆给你</div>';
+    return;
+  }
+  // 每种保养类型只取 km 最大（最新）的一条记录，避免重复警报
+  const latest = {};
+  maint.filter(r => r.nextKm).forEach(r => {
+    if (!latest[r.type] || r.km > latest[r.type].km) latest[r.type] = r;
   });
-  const drs=car.dateReminders||[];
-  drs.forEach(r=>{
-    const days=getDRStatus(r.expiry);
-    if(days<0)box.innerHTML+=`<div class="alert ae">🚨 ${DR_NAMES[r.type]} 已过期 ${Math.abs(days)} 天！</div>`;
-    else if(days<=r.warnDays)box.innerHTML+=`<div class="alert ap">📅 ${DR_NAMES[r.type]} 还剩 ${days} 天到期</div>`;
+  Object.values(latest).forEach(r => {
+    const d = r.nextKm - curKm;
+    if (d < 0)
+      box.innerHTML += `<div class="alert ae">⚠️ ${esc(r.type)} 已超期 ${Math.abs(d)} km！请尽快保养</div>`;
+    else if (d < 500)
+      box.innerHTML += `<div class="alert aw">🔔 ${esc(r.type)} 还剩 ${d} km 到期</div>`;
+  });
+  // 日期提醒警报
+  const drs = car.dateReminders || [];
+  drs.forEach(r => {
+    const days = getDRStatus(r.expiry);
+    if (days < 0)
+      box.innerHTML += `<div class="alert ae">🚨 ${DR_NAMES[r.type]} 已过期 ${Math.abs(days)} 天！</div>`;
+    else if (days <= r.warnDays)
+      box.innerHTML += `<div class="alert ap">📅 ${DR_NAMES[r.type]} 还剩 ${days} 天到期</div>`;
   });
 }
 
