@@ -1831,18 +1831,18 @@ function renderAnalytics(){
       <div class="bar-track" style="height:22px"><div style="position:absolute;inset:0;width:${pct}%;display:flex;border-radius:4px;overflow:hidden">
       <div style="flex:${fp};background:var(--accent)"></div><div style="flex:${mp};background:var(--blue)"></div></div></div>
       <span class="bar-val">RM ${tot.toFixed(0)}</span></div>`;}).join('');}
-  const effs=computeEfficiency(fuel);
+  const effs2=computeEfficiency(fuel);
   const ed=document.getElementById('eff-detail');
-  if(!effs.length){ed.innerHTML='<div class="empty">需至少2次满箱记录</div>';}
-  else{const mx2=Math.max(...effs.map(e=>e.kmL),1);
-    const avg=(effs.reduce((s,e)=>s+e.kmL,0)/effs.length).toFixed(1);
-    const min=Math.min(...effs.map(e=>e.kmL)).toFixed(1),max=Math.max(...effs.map(e=>e.kmL)).toFixed(1);
-    effs.reverse();
+  if(!effs2.length){ed.innerHTML='<div class="empty">需至少2次满箱记录</div>';}
+  else{const mx2=Math.max(...effs2.map(e=>e.kmL),1);
+    const avg=(effs2.reduce((s,e)=>s+e.kmL,0)/effs2.length).toFixed(1);
+    const min=Math.min(...effs2.map(e=>e.kmL)).toFixed(1),max=Math.max(...effs2.map(e=>e.kmL)).toFixed(1);
+    effs2.reverse();
     ed.innerHTML=`<div style="display:flex;gap:16px;margin-bottom:10px;font-size:12px">
       <span style="color:var(--text2)">平均 <strong style="color:var(--accent)">${avg} km/L</strong></span>
       <span style="color:var(--text2)">最佳 <strong style="color:var(--green)">${max}</strong></span>
       <span style="color:var(--text2)">最低 <strong style="color:var(--red)">${min}</strong></span></div>`
-    +effs.map(e=>{const pct=Math.round(e.kmL/mx2*100),col=e.kmL>=12?'var(--green)':e.kmL>=9?'var(--accent)':'var(--red)';
+    +effs2.map(e=>{const pct=Math.round(e.kmL/mx2*100),col=e.kmL>=12?'var(--green)':e.kmL>=9?'var(--accent)':'var(--red)';
       const ex=e.segments>1?` <span style="color:var(--text3);font-size:10px">(${e.segments}次合并·${e.liters}L/${e.dist}km)</span>`:'';
       return`<div class="eff-row"><span class="eff-date">${e.date}</span>
       <div class="eff-track"><div class="eff-bar" style="width:${pct}%;background:${col}"></div></div>
