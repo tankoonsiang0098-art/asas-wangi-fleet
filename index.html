@@ -229,7 +229,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.6</div>
+    <div class="hsub">Asas Wangi Fleet · v5.7</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -405,13 +405,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
     margin:14px 0 8px;flex-wrap:wrap;gap:6px">
     <div class="sh" style="margin:0">历史保养记录</div>
     <div style="display:flex;gap:6px">
-      <select id="maint-month-filter-sel"
-        onchange="setMaintMonthFilter(this.value)"
+      <select id="maint-year-filter-sel"
+        onchange="setMaintYearFilter(this.value)"
         style="background:var(--bg3);border:1px solid var(--border2);
         border-radius:7px;padding:5px 10px;color:var(--text2);
         font-family:var(--bf);font-size:12px;outline:none;cursor:pointer;
         max-width:130px">
-        <option value="all">全部月份</option>
+        <option value="all">全部年份</option>
       </select>
       <select id="maint-filter-sel"
         onchange="setMaintFilter(this.value)"
@@ -842,7 +842,7 @@ const pendingAttach = { f: [], m: [], dr: [], ef: [], em: [], edr: [] };
 
 let maintFilter = 'all'; // 保养记录筛选状态
 let fuelMonthFilter = 'all';  // 加油记录月份筛选
-let maintMonthFilter = 'all'; // 保养记录月份筛选
+let maintYearFilter = 'all'; // 保养记录年度筛选
 let state = {
   currentCarId:null, cars:[], currentCarFuel:[], currentCarMaint:[], currentCarDRs:[],
   currentUser:null, currentMember:null, members:[]
@@ -1041,7 +1041,7 @@ function selectCar(id){
   state.currentCarId=id;
   maintFilter='all';
   fuelMonthFilter='all';
-  maintMonthFilter='all';
+  maintYearFilter='all';
   listenToCarData(id);
 }
 async function addCar(){
@@ -1199,7 +1199,7 @@ function renderMaintList(){
   const c=currentCar();
   let maint=c?[...c.maint].reverse():[];
   if(maintFilter !== 'all') maint = maint.filter(r => r.type === maintFilter);
-  if(maintMonthFilter !== 'all') maint = maint.filter(r => r.date.slice(0,7) === maintMonthFilter);
+  if(maintYearFilter !== 'all') maint = maint.filter(r => r.date.slice(0,4) === maintYearFilter);
   const el=document.getElementById('maint-list');
   if(!maint.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
   el.innerHTML=maint.map(r=>{
@@ -1503,8 +1503,8 @@ function renderDashboard(){
     else if(d>0){el.className='trend down';el.textContent=`▲ ${d.toFixed(1)} 效率提升 ✓`;}
     else{el.className='trend up';el.textContent=`▼ ${Math.abs(d).toFixed(1)} 效率下降`;}
   }else document.getElementById('d-avg-trend').textContent='';
-  const allKm=[...fuel.map(r=>r.km),...maint.map(r=>r.km)];
-  const maxKm=allKm.length?Math.max(...allKm):0,minKm=allKm.length?Math.min(...allKm):0;
+  const fuelKms=fuel.map(r=>r.km);
+  const maxKm=fuelKms.length?Math.max(...fuelKms):0,minKm=fuelKms.length?Math.min(...fuelKms):0;
   document.getElementById('d-km').textContent=maxKm?(maxKm-minKm).toLocaleString():'—';
   renderMiniMonthly(fuel,maint);renderMiniEff(effs);renderReminders(maint,maxKm);renderDRDash();renderAlerts(maint,maxKm,c);
 }
@@ -1587,8 +1587,8 @@ function renderAnalytics(){
   document.getElementById('a-tfuel').textContent=tf?tf.toFixed(0):'—';
   document.getElementById('a-tmaint').textContent=tm?tm.toFixed(0):'—';
   document.getElementById('a-fcount').textContent=fuel.length||'—';
-  const allKm=[...fuel.map(r=>r.km),...maint.map(r=>r.km)];
-  const mx=allKm.length?Math.max(...allKm):0,mn=allKm.length?Math.min(...allKm):0;
+  const fuelKms=fuel.map(r=>r.km);
+  const mx=fuelKms.length?Math.max(...fuelKms):0,mn=fuelKms.length?Math.min(...fuelKms):0;
   document.getElementById('a-cpkm').textContent=(mx-mn)>0?((tf+tm)/(mx-mn)).toFixed(3):'—';
   const cb=document.getElementById('cost-breakdown');
   if(!tf&&!tm){cb.innerHTML='<div class="empty">暂无数据</div>';}
@@ -1730,8 +1730,8 @@ function exportReport(){
   const tf=fuel.reduce((s,r)=>s+r.total,0),tm=maint.reduce((s,r)=>s+r.cost,0);
   const effs=computeEfficiency(fuel);
   const avgE=effs.length?(effs.reduce((s,e)=>s+e.kmL,0)/effs.length).toFixed(1):'—';
-  const allKm=[...fuel.map(r=>r.km),...maint.map(r=>r.km)];
-  const td=allKm.length?Math.max(...allKm)-Math.min(...allKm):0;
+  const fuelKms=fuel.map(r=>r.km);
+  const td=fuelKms.length?Math.max(...fuelKms)-Math.min(...fuelKms):0;
   const html=`<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><title>AUTO LOG 报告 - ${c.plate}</title>
 <style>body{font-family:Arial,sans-serif;max-width:750px;margin:40px auto;padding:20px;color:#222}
 h1{color:#e8a020;font-size:24px;border-bottom:2px solid #e8a020;padding-bottom:8px}
@@ -1914,21 +1914,21 @@ function refreshFuelMonthFilter() {
 }
 
 // ── MAINT MONTH FILTER ───────────────────────────────
-function setMaintMonthFilter(val) {
-  maintMonthFilter = val;
+function setMaintYearFilter(val) {
+  maintYearFilter = val;
   renderMaintList();
 }
-function refreshMaintMonthFilter() {
-  const sel = document.getElementById('maint-month-filter-sel');
+function refreshMaintYearFilter() {
+  const sel = document.getElementById('maint-year-filter-sel');
   if (!sel) return;
   const c = currentCar();
-  const months = [...new Set((c?.maint || []).map(r => r.date.slice(0, 7)))].sort().reverse();
+  const years = [...new Set((c?.maint || []).map(r => r.date.slice(0, 4)))].sort().reverse();
   const cur = sel.value;
-  sel.innerHTML = '<option value="all">全部月份</option>' +
-    months.map(m => `<option value="${m}"${m === cur ? ' selected' : ''}>${m}</option>`).join('');
-  if (cur !== 'all' && !months.includes(cur)) {
+  sel.innerHTML = '<option value="all">全部年份</option>' +
+    years.map(y => `<option value="${y}"${y === cur ? ' selected' : ''}>${y}</option>`).join('');
+  if (cur !== 'all' && !years.includes(cur)) {
     sel.value = 'all';
-    maintMonthFilter = 'all';
+    maintYearFilter = 'all';
   }
 }
 
@@ -2004,7 +2004,7 @@ function renderAll(){
   refreshSuggestions();
   refreshMaintFilter();
   refreshFuelMonthFilter();
-  refreshMaintMonthFilter();
+  refreshMaintYearFilter();
 }
 
 // ── BOTTOM NAV ────────────────────────────────────────
@@ -2063,7 +2063,7 @@ Object.assign(window,{
   openSuggest,filterSuggest,selectSuggest,
   setMaintFilter,refreshMaintFilter,
   setFuelMonthFilter,refreshFuelMonthFilter,
-  setMaintMonthFilter,refreshMaintMonthFilter
+  setMaintYearFilter,refreshMaintYearFilter
 });
 </script>
 </body>
