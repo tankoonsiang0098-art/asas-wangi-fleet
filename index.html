@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.9</div>
+    <div class="hsub">Asas Wangi Fleet · v5.10</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -286,12 +286,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
           <button type="button" onclick="openPicker('f-date')"
             style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;
             color:var(--text2);padding:7px 8px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
-        <button type="button" onclick="triggerAIScan('fuel')"
+        <button type="button" onclick="openAIScanModal('fuel')"
           style="background:rgba(64,144,232,.15);border:1px solid rgba(64,144,232,.3);border-radius:6px;
           color:var(--blue);padding:7px 8px;cursor:pointer;flex-shrink:0;font-size:14px"
           title="AI 识别收据">📷</button>
-        <input type="file" id="ai-fuel-input" accept="image/*" multiple
-          style="display:none" onchange="handleAIScan('fuel',this)">
         </div>
       </div>
       <div class="fld fg-km"><label>里程 (km)</label>
@@ -369,12 +367,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
           <input type="text" id="m-date" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
           <input type="date" id="m-date-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
           <button type="button" onclick="openPicker('m-date')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
-          <button type="button" onclick="triggerAIScan('maint')"
+          <button type="button" onclick="openAIScanModal('maint')"
             style="background:rgba(64,144,232,.15);border:1px solid rgba(64,144,232,.3);border-radius:6px;
             color:var(--blue);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px"
             title="AI 识别保养单">📷</button>
-          <input type="file" id="ai-maint-input" accept="image/*" multiple
-            style="display:none" onchange="handleAIScan('maint',this)">
         </div>
       </div>
       <div class="fld fg-km"><label>里程 (km)</label><input type="number" id="m-km" placeholder="45230"></div>
@@ -815,6 +811,56 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
     <div style="display:flex;gap:8px">
       <button class="btn btn-danger btn-sm" onclick="clearAIKey()" style="flex:1">清除 Key</button>
       <button class="btn btn-primary" onclick="saveAIKey()" style="flex:2">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI SCAN MODAL -->
+<div class="overlay" id="ai-scan-modal" style="display:none">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-title">
+      <span id="ai-scan-title">📷 AI 识别加油收据</span>
+      <button class="close-btn" onclick="hideAIScanModal()"
+        style="width:36px;height:36px;border-radius:8px;background:var(--bg4);
+        border:1px solid var(--border2);color:var(--text);font-size:22px;
+        display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px">
+      拍摄或从相册选取图片（最多 3 张），AI 将综合识别为一笔记录
+    </div>
+    <!-- 3 个图片槽位 -->
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <div id="ai-slot-0" class="ai-slot" style="flex:1;border:1.5px dashed var(--border2);border-radius:10px;padding:8px;text-align:center;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative">
+        <div id="ai-thumb-0" style="display:none;width:100%;height:64px;border-radius:6px;overflow:hidden;margin-bottom:4px"><img style="width:100%;height:100%;object-fit:cover"></div>
+        <button type="button" onclick="triggerAISlot(0,'camera')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:5px 10px;cursor:pointer;font-size:12px;width:100%">📷 拍摄</button>
+        <button type="button" onclick="triggerAISlot(0,'gallery')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:5px 10px;cursor:pointer;font-size:12px;width:100%">🖼️ 相册</button>
+        <button type="button" id="ai-clear-0" onclick="clearAISlot(0)" style="display:none;position:absolute;top:4px;right:4px;background:rgba(232,80,64,.15);border:none;border-radius:4px;color:var(--red);cursor:pointer;font-size:12px;padding:2px 6px">×</button>
+      </div>
+      <div id="ai-slot-1" class="ai-slot" style="flex:1;border:1.5px dashed var(--border2);border-radius:10px;padding:8px;text-align:center;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative">
+        <div id="ai-thumb-1" style="display:none;width:100%;height:64px;border-radius:6px;overflow:hidden;margin-bottom:4px"><img style="width:100%;height:100%;object-fit:cover"></div>
+        <button type="button" onclick="triggerAISlot(1,'camera')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:5px 10px;cursor:pointer;font-size:12px;width:100%">📷 拍摄</button>
+        <button type="button" onclick="triggerAISlot(1,'gallery')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:5px 10px;cursor:pointer;font-size:12px;width:100%">🖼️ 相册</button>
+        <button type="button" id="ai-clear-1" onclick="clearAISlot(1)" style="display:none;position:absolute;top:4px;right:4px;background:rgba(232,80,64,.15);border:none;border-radius:4px;color:var(--red);cursor:pointer;font-size:12px;padding:2px 6px">×</button>
+      </div>
+      <div id="ai-slot-2" class="ai-slot" style="flex:1;border:1.5px dashed var(--border2);border-radius:10px;padding:8px;text-align:center;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative">
+        <div id="ai-thumb-2" style="display:none;width:100%;height:64px;border-radius:6px;overflow:hidden;margin-bottom:4px"><img style="width:100%;height:100%;object-fit:cover"></div>
+        <button type="button" onclick="triggerAISlot(2,'camera')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:5px 10px;cursor:pointer;font-size:12px;width:100%">📷 拍摄</button>
+        <button type="button" onclick="triggerAISlot(2,'gallery')" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:5px 10px;cursor:pointer;font-size:12px;width:100%">🖼️ 相册</button>
+        <button type="button" id="ai-clear-2" onclick="clearAISlot(2)" style="display:none;position:absolute;top:4px;right:4px;background:rgba(232,80,64,.15);border:none;border-radius:4px;color:var(--red);cursor:pointer;font-size:12px;padding:2px 6px">×</button>
+      </div>
+    </div>
+    <!-- 隐藏 file inputs -->
+    <input type="file" id="ai-slot-cam-0" accept="image/*" capture="environment" style="display:none" onchange="receiveAISlot(0,this)">
+    <input type="file" id="ai-slot-gal-0" accept="image/*" style="display:none" onchange="receiveAISlot(0,this)">
+    <input type="file" id="ai-slot-cam-1" accept="image/*" capture="environment" style="display:none" onchange="receiveAISlot(1,this)">
+    <input type="file" id="ai-slot-gal-1" accept="image/*" style="display:none" onchange="receiveAISlot(1,this)">
+    <input type="file" id="ai-slot-cam-2" accept="image/*" capture="environment" style="display:none" onchange="receiveAISlot(2,this)">
+    <input type="file" id="ai-slot-gal-2" accept="image/*" style="display:none" onchange="receiveAISlot(2,this)">
+    <!-- 状态提示 -->
+    <div id="ai-scan-status" style="font-size:12px;text-align:center;min-height:20px;margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="hideAIScanModal()" style="flex:1">取消</button>
+      <button class="btn btn-primary" onclick="startAIScan()" id="ai-scan-btn" style="flex:2">🔍 开始识别</button>
     </div>
   </div>
 </div>
@@ -1509,9 +1555,165 @@ function renderCustomTypesList(){
 }
 function showAddTypeModal(){renderCustomTypesList();document.getElementById('add-type-modal').style.display='flex';}
 
+// ── AI SCAN MODAL ────────────────────────────────────
+let aiScanType = 'fuel';
+let aiSlotFiles = [null, null, null];
+
+function openAIScanModal(type) {
+  const key = localStorage.getItem('gemini_api_key');
+  if (!key) {
+    alert('请先在「🤖 AI 设置」中输入 Gemini API Key');
+    showAISettingsModal();
+    return;
+  }
+  aiScanType = type;
+  aiSlotFiles = [null, null, null];
+  // 重置槽位
+  [0,1,2].forEach(i => {
+    const thumb = document.getElementById(`ai-thumb-${i}`);
+    thumb.style.display = 'none';
+    thumb.querySelector('img').src = '';
+    document.getElementById(`ai-clear-${i}`).style.display = 'none';
+  });
+  document.getElementById('ai-scan-title').textContent =
+    type === 'fuel' ? '📷 AI 识别加油收据' : '📷 AI 识别保养单';
+  document.getElementById('ai-scan-status').textContent = '';
+  document.getElementById('ai-scan-status').style.color = 'var(--text3)';
+  document.getElementById('ai-scan-btn').disabled = false;
+  document.getElementById('ai-scan-modal').style.display = 'flex';
+}
+function hideAIScanModal() {
+  document.getElementById('ai-scan-modal').style.display = 'none';
+}
+function triggerAISlot(idx, source) {
+  document.getElementById(`ai-slot-${source === 'camera' ? 'cam' : 'gal'}-${idx}`).click();
+}
+function receiveAISlot(idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  aiSlotFiles[idx] = file;
+  // 显示缩略图
+  const reader = new FileReader();
+  reader.onload = e => {
+    const thumb = document.getElementById(`ai-thumb-${idx}`);
+    thumb.querySelector('img').src = e.target.result;
+    thumb.style.display = 'block';
+    document.getElementById(`ai-clear-${idx}`).style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+function clearAISlot(idx) {
+  aiSlotFiles[idx] = null;
+  const thumb = document.getElementById(`ai-thumb-${idx}`);
+  thumb.style.display = 'none';
+  thumb.querySelector('img').src = '';
+  document.getElementById(`ai-clear-${idx}`).style.display = 'none';
+}
+async function startAIScan() {
+  const files = aiSlotFiles.filter(f => f !== null);
+  if (!files.length) {
+    document.getElementById('ai-scan-status').textContent = '⚠️ 请至少选择一张图片';
+    document.getElementById('ai-scan-status').style.color = 'var(--accent)';
+    return;
+  }
+  const key = localStorage.getItem('gemini_api_key');
+  if (!key) return;
+  const btn = document.getElementById('ai-scan-btn');
+  const status = document.getElementById('ai-scan-status');
+  btn.disabled = true;
+  status.textContent = `⏳ AI 识别中…（${files.length} 张图片）`;
+  status.style.color = 'var(--blue)';
+  // 压缩图片
+  async function processImage(file) {
+    const compressed = await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 1024; let [w, h] = [img.width, img.height];
+          if (w > MAX || h > MAX) { if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; } }
+          const canvas = document.createElement('canvas');
+          [canvas.width, canvas.height] = [w, h];
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.80);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    return await new Promise(resolve => {
+      const r = new FileReader();
+      r.onload = e => resolve(e.target.result.split(',')[1]);
+      r.readAsDataURL(compressed);
+    });
+  }
+  const prompt = aiScanType === 'fuel'
+    ? `分析这些图片（可能是同一笔加油记录的不同角度，如里程表、收据、油站招牌），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"date":"日期格式DD/MM/YY如01/06/26","km":里程数字,"liters":加油升数,"price_per_liter":每升单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
+    : `分析这些图片（可能是同一笔保养记录的不同角度，如保养报告、收据、里程表），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"date":"日期格式DD/MM/YY如01/06/26","km":当前里程数字,"type":保养项目名称中文,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
+  try {
+    const b64list = await Promise.all(files.map(f => processImage(f)));
+    const content = b64list.map(b64 => ({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${b64}` } }));
+    content.push({ type: 'text', text: prompt });
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({ model: GEMINI_MODEL, max_tokens: 500, messages: [{ role: 'user', content }] })
+    });
+    if (res.status === 429) throw new Error('QUOTA');
+    if (res.status === 401) throw new Error('AUTH');
+    if (res.status === 400) throw new Error('FORMAT');
+    if (!res.ok) throw new Error('SERVER');
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    if (!parsed) throw new Error('NULL');
+    // 填入表单
+    const hl = 'background:rgba(64,144,232,.12);border-radius:4px';
+    if (aiScanType === 'fuel') {
+      if (parsed.date) { const el = document.getElementById('f-date'); el.value = parsed.date; el.style.cssText = hl; }
+      if (parsed.km) { const el = document.getElementById('f-km'); el.value = parsed.km; el.style.cssText = hl; }
+      if (parsed.liters) { const el = document.getElementById('f-liters'); el.value = parsed.liters; el.style.cssText = hl; }
+      if (parsed.price_per_liter) { const el = document.getElementById('f-price'); el.value = parsed.price_per_liter; el.style.cssText = hl; }
+      if (parsed.station) { const el = document.getElementById('f-station'); el.value = parsed.station; el.style.cssText = hl; }
+      if (parsed.fuel_type) document.getElementById('f-type').value = parsed.fuel_type;
+      updatePreview();
+    } else {
+      if (parsed.date) { const el = document.getElementById('m-date'); el.value = parsed.date; el.style.cssText = hl; }
+      if (parsed.km) { const el = document.getElementById('m-km'); el.value = parsed.km; el.style.cssText = hl; }
+      if (parsed.cost) { const el = document.getElementById('m-cost'); el.value = parsed.cost; el.style.cssText = hl; }
+      if (parsed.shop) { const el = document.getElementById('m-shop'); el.value = parsed.shop; el.style.cssText = hl; }
+      if (parsed.note) { const el = document.getElementById('m-note'); el.value = parsed.note; el.style.cssText = hl; }
+      if (parsed.type) {
+        const sel = document.getElementById('m-type');
+        const opt = [...sel.options].find(o => o.value === parsed.type);
+        if (opt) sel.value = parsed.type;
+      }
+      autoNextKm();
+    }
+    status.textContent = '✅ 识别完成，请核对后提交';
+    status.style.color = 'var(--green)';
+    btn.disabled = false;
+    // 3秒后自动关闭 Modal
+    setTimeout(() => hideAIScanModal(), 3000);
+  } catch(e) {
+    const msg = {
+      QUOTA: '今日 AI 识别额度已用完，明天再试',
+      AUTH: 'API Key 无效，请到「🤖 AI 设置」更新',
+      FORMAT: '图片格式错误，请重新拍摄',
+      SERVER: '服务器暂时故障，请稍后重试',
+      NULL: '无法识别图片内容，请手动填写',
+    }[e.message] || '识别失败，请手动填写';
+    status.textContent = `❌ ${msg}`;
+    status.style.color = 'var(--red)';
+    btn.disabled = false;
+  }
+}
+
 // ── AI SETTINGS ──────────────────────────────────────
 const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-const GEMINI_MODEL='gemini-2.5-flash-lite';
+const GEMINI_MODEL='gemini-3.1-flash-lite';
 
 function showAISettingsModal(){
   const key=localStorage.getItem('gemini_api_key')||'';
@@ -1590,8 +1792,8 @@ async function handleAIScan(type,input){
   loadingDiv.textContent=`⏳ AI 识别中…（${files.length} 张图片）`;
   targetEl.insertBefore(loadingDiv,targetEl.querySelector('.divider'));
   const prompt=type==='fuel'
-    ?`分析这些图片（可能是同一笔加油记录的不同角度，如里程表、收据、油站招牌），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"km":里程数字,"liters":加油升数,"price_per_liter":每升单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
-    :`分析这些图片（可能是同一笔保养记录的不同角度，如保养报告、收据、里程表），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"km":当前里程数字,"type":保养项目名称中文,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
+    ?`分析这些图片（可能是同一笔加油记录的不同角度，如里程表、收据、油站招牌），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"date":"日期格式DD/MM/YY如01/06/26","km":里程数字,"liters":加油升数,"price_per_liter":每升单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
+    :`分析这些图片（可能是同一笔保养记录的不同角度，如保养报告、收据、里程表），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"date":"日期格式DD/MM/YY如01/06/26","km":当前里程数字,"type":保养项目名称中文,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
   try{
     // 处理所有图片为 base64
     const b64list=await Promise.all(files.map(f=>processImage(f)));
@@ -1618,6 +1820,7 @@ async function handleAIScan(type,input){
     // 填入表单
     const hl='background:rgba(64,144,232,.12);border-radius:4px';
     if(type==='fuel'){
+      if(parsed.date){const el=document.getElementById('f-date');el.value=parsed.date;el.style.cssText=hl;}
       if(parsed.km){const el=document.getElementById('f-km');el.value=parsed.km;el.style.cssText=hl;}
       if(parsed.liters){const el=document.getElementById('f-liters');el.value=parsed.liters;el.style.cssText=hl;}
       if(parsed.price_per_liter){const el=document.getElementById('f-price');el.value=parsed.price_per_liter;el.style.cssText=hl;}
@@ -1625,6 +1828,7 @@ async function handleAIScan(type,input){
       if(parsed.fuel_type){document.getElementById('f-type').value=parsed.fuel_type;}
       updatePreview();
     }else{
+      if(parsed.date){const el=document.getElementById('m-date');el.value=parsed.date;el.style.cssText=hl;}
       if(parsed.km){const el=document.getElementById('m-km');el.value=parsed.km;el.style.cssText=hl;}
       if(parsed.cost){const el=document.getElementById('m-cost');el.value=parsed.cost;el.style.cssText=hl;}
       if(parsed.shop){const el=document.getElementById('m-shop');el.value=parsed.shop;el.style.cssText=hl;}
@@ -1636,9 +1840,8 @@ async function handleAIScan(type,input){
       }
       autoNextKm();
     }
-    loadingDiv.textContent='✅ 识别完成，请核对后提交';
+    loadingDiv.innerHTML='✅ 识别完成，请核对后提交 <button onclick="this.closest(\'div\').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;margin-left:6px">×</button>';
     loadingDiv.style.color='var(--green)';
-    setTimeout(()=>loadingDiv.remove(),3000);
   }catch(e){
     const msg={
       QUOTA:'今日 AI 识别额度已用完，明天再试',
@@ -1647,9 +1850,8 @@ async function handleAIScan(type,input){
       SERVER:'服务器暂时故障，请稍后重试',
       NULL:'无法识别图片内容，请手动填写',
     }[e.message]||'识别失败，请手动填写';
-    loadingDiv.textContent=`❌ ${msg}`;
+    loadingDiv.innerHTML=`❌ ${msg} <button onclick="this.closest('div').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;margin-left:6px">×</button>`;
     loadingDiv.style.color='var(--red)';
-    setTimeout(()=>loadingDiv.remove(),4000);
   }
 }
 
@@ -2361,7 +2563,8 @@ Object.assign(window,{
   setFuelMonthFilter,refreshFuelMonthFilter,
   setMaintYearFilter,refreshMaintYearFilter,
   showAISettingsModal,hideAISettingsModal,saveAIKey,clearAIKey,
-  triggerAIScan,handleAIScan
+  triggerAIScan,handleAIScan,
+  openAIScanModal,hideAIScanModal,triggerAISlot,receiveAISlot,clearAISlot,startAIScan
 });
 </script>
 </body>
