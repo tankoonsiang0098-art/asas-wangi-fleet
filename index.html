@@ -104,6 +104,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
 .toggle-slider{position:absolute;inset:0;background:var(--bg4);border-radius:11px;cursor:pointer;transition:.2s}
 .toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--text3);border-radius:50%;transition:.2s}
 .toggle input:checked+.toggle-slider{background:var(--red)}
+#ef-excluded:checked+.toggle-slider { background: var(--text3); }
 .toggle input:checked+.toggle-slider:before{transform:translateX(18px);background:#fff}
 .cost-bar{display:flex;height:20px;border-radius:5px;overflow:hidden;margin-bottom:8px}
 .cb-fuel{background:var(--accent)}.cb-maint{background:var(--blue)}
@@ -229,7 +230,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.7</div>
+    <div class="hsub">Asas Wangi Fleet · v5.8</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -284,6 +285,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
           <button type="button" onclick="openPicker('f-date')"
             style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;
             color:var(--text2);padding:7px 8px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
+        <button type="button" onclick="triggerAIScan('fuel')"
+          style="background:rgba(64,144,232,.15);border:1px solid rgba(64,144,232,.3);border-radius:6px;
+          color:var(--blue);padding:7px 8px;cursor:pointer;flex-shrink:0;font-size:14px"
+          title="AI 识别收据">📷</button>
+        <input type="file" id="ai-fuel-input" accept="image/*" capture="environment"
+          style="display:none" onchange="handleAIScan('fuel',this)">
         </div>
       </div>
       <div class="fld fg-km"><label>里程 (km)</label>
@@ -361,6 +368,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
           <input type="text" id="m-date" placeholder="DD/MM/YY" maxlength="10" style="flex:1" autocomplete="off">
           <input type="date" id="m-date-hidden" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
           <button type="button" onclick="openPicker('m-date')" style="background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px">📅</button>
+          <button type="button" onclick="triggerAIScan('maint')"
+            style="background:rgba(64,144,232,.15);border:1px solid rgba(64,144,232,.3);border-radius:6px;
+            color:var(--blue);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px"
+            title="AI 识别保养单">📷</button>
+          <input type="file" id="ai-maint-input" accept="image/*" capture="environment"
+            style="display:none" onchange="handleAIScan('maint',this)">
         </div>
       </div>
       <div class="fld fg-km"><label>里程 (km)</label><input type="number" id="m-km" placeholder="45230"></div>
@@ -479,7 +492,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="stats-row">
     <div class="sc"><div class="sc-label">总油费</div><div class="sc-val" id="a-tfuel">—</div><div class="sc-unit">RM</div></div>
     <div class="sc"><div class="sc-label">总保养费</div><div class="sc-val" id="a-tmaint">—</div><div class="sc-unit">RM</div></div>
-    <div class="sc"><div class="sc-label">每公里成本</div><div class="sc-val" id="a-cpkm">—</div><div class="sc-unit">RM/km</div></div>
+    <div class="sc"><div class="sc-label">每公里成本</div><div class="sc-val" id="a-cpkm">—</div><div class="sc-unit">RM/km</div><div id="a-cpkm-note" style="font-size:10px;color:var(--text3);margin-top:3px"></div></div>
     <div class="sc"><div class="sc-label">加油次数</div><div class="sc-val" id="a-fcount">—</div><div class="sc-unit">次</div></div>
   </div>
   <div class="card"><div class="card-title"><i class="ti ti-chart-donut"></i> 开支构成</div><div id="cost-breakdown"><div class="empty">暂无数据</div></div></div>
@@ -572,6 +585,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
     <div class="toggle-row" style="margin-top:8px">
       <div><div class="toggle-label">⚠️ 未加满油箱</div></div>
       <label class="toggle"><input type="checkbox" id="ef-notfull"><span class="toggle-slider"></span></label>
+    </div>
+    <div id="ef-anomaly-notice" style="display:none;background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.3);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12px;color:var(--accent)">
+      ⚠️ 系统检测到此段油耗偏离你的历史平均值较大，可能因中途有未录入的加油记录。你可以选择将此段排除在效率计算之外。
+    </div>
+    <div class="toggle-row" style="margin-top:8px">
+      <div><div class="toggle-label">🚫 排除此段效率计算</div><div style="font-size:11px;color:var(--text3);margin-top:2px">此记录仍保留，但不纳入油耗和每公里成本统计</div></div>
+      <label class="toggle"><input type="checkbox" id="ef-excluded"><span class="toggle-slider" style=""></span></label>
     </div>
     <div class="fld" style="margin-top:8px"><label>备注</label><textarea id="ef-note"></textarea></div>
     <div class="fld" style="margin-top:8px">
@@ -772,6 +792,32 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   </div>
 </div>
 
+<!-- AI SETTINGS MODAL -->
+<div class="overlay" id="ai-settings-modal" style="display:none">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-title">🤖 AI 识别设置
+      <button class="close-btn" onclick="hideAISettingsModal()"
+        style="width:36px;height:36px;border-radius:8px;background:var(--bg4);
+        border:1px solid var(--border2);color:var(--text);font-size:22px;
+        display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">
+      使用 Gemini AI 拍照自动识别加油收据和保养报告。<br>
+      请在 <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--blue)">Google AI Studio</a> 免费获取 API Key。
+    </div>
+    <div class="fld">
+      <label>Gemini API Key</label>
+      <input type="password" id="ai-key-input" placeholder="AIza... 或 AQ...">
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px">Key 仅存储在本机，不会上传至服务器</div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-danger btn-sm" onclick="clearAIKey()" style="flex:1">清除 Key</button>
+      <button class="btn btn-primary" onclick="saveAIKey()" style="flex:2">保存</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- .app -->
 
 <!-- BOTTOM NAV -->
@@ -801,6 +847,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <button class="more-menu-btn" onclick="switchTab('records');closeMoreMenu()">📋 记录</button>
   <button class="more-menu-btn" id="more-admin-btn" style="display:none"
     onclick="switchTab('admin');closeMoreMenu()">⚙️ 管理</button>
+  <button class="more-menu-btn" onclick="showAISettingsModal();closeMoreMenu()">🤖 AI 设置</button>
 </div>
 
 </div><!-- #page-app -->
@@ -1107,6 +1154,7 @@ async function addFuel(){
     await addDoc(collection(db,`${ORG}/cars/${car.id}/fuel`),{
       date,km,liters,price,station,type,note,notFull,
       total:+(liters*price).toFixed(2),
+      excluded:false,
       attachments:[...pendingAttach.f],
       addedBy:state.currentMember.displayName,addedAt:serverTimestamp()
     });
@@ -1136,16 +1184,19 @@ function renderFuelList(){
   if(fuelMonthFilter!=='all') fuel=fuel.filter(r=>r.date.slice(0,7)===fuelMonthFilter);
   const el=document.getElementById('fuel-list');
   if(!fuel.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
+  const anomalies=detectAnomalies(c?.fuel||[]);
   el.innerHTML=fuel.map(r=>{
     const edit=canDelete(r)?`<button class="btn btn-sm btn-ghost" onclick="showEditFuelModal('${r.id}')" style="margin-left:6px;flex-shrink:0">编辑</button>`:'';
     const del=canDelete(r)?`<button class="btn btn-sm btn-danger" onclick="deleteFuel('${r.id}')" style="margin-left:6px;flex-shrink:0">删</button>`:'';
     const by=r.addedBy?` · 由 ${esc(r.addedBy)} 添加`:'';
-    return`<div class="rec"><div class="rec-icon ri-fuel">⛽</div>
+    const excludedBadge=r.excluded?'<span class="badge" style="background:rgba(90,96,112,.2);color:var(--text3)">已排除</span> ':'';
+    const anomalyNote=(!r.excluded&&anomalies.has(r.id))?`<div style="font-size:11px;color:var(--accent);margin-top:3px">⚠️ 此段油耗偏离平均值较大，建议在编辑中检查或排除</div>`:'';
+    return`<div class="rec" style="${r.excluded?'opacity:0.55':''}"><div class="rec-icon ri-fuel">⛽</div>
     <div class="rec-body"><div class="rec-top">
-      <span class="rec-name">${esc(r.station)} · <span class="badge bf">${r.type}</span>${r.notFull?' <span class="badge bnf">未加满</span>':''}</span>
+      <span class="rec-name">${excludedBadge}${esc(r.station)} · <span class="badge bf">${r.type}</span>${r.notFull?' <span class="badge bnf">未加满</span>':''}</span>
       <span class="rec-amt">RM ${r.total.toFixed(2)}</span></div>
     <div class="rec-meta">${r.date} · ${r.km.toLocaleString()} km · ${r.liters}L × RM${r.price}${r.note?' · '+esc(r.note):''}${by}</div>
-    </div>${edit}${del}</div>`;
+    ${anomalyNote}</div>${edit}${del}</div>`;
   }).join('');
 }
 
@@ -1457,10 +1508,167 @@ function renderCustomTypesList(){
 }
 function showAddTypeModal(){renderCustomTypesList();document.getElementById('add-type-modal').style.display='flex';}
 
+// ── AI SETTINGS ──────────────────────────────────────
+const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+const GEMINI_MODEL='gemini-2.5-flash-lite';
+
+function showAISettingsModal(){
+  const key=localStorage.getItem('gemini_api_key')||'';
+  document.getElementById('ai-key-input').value=key;
+  document.getElementById('ai-settings-modal').style.display='flex';
+}
+function hideAISettingsModal(){
+  document.getElementById('ai-settings-modal').style.display='none';
+}
+function saveAIKey(){
+  const key=document.getElementById('ai-key-input').value.trim();
+  if(!key){alert('请输入 API Key');return;}
+  localStorage.setItem('gemini_api_key',key);
+  alert('已保存');hideAISettingsModal();
+}
+function clearAIKey(){
+  if(!confirm('确认清除 API Key？'))return;
+  localStorage.removeItem('gemini_api_key');
+  document.getElementById('ai-key-input').value='';
+  alert('已清除');
+}
+function triggerAIScan(type){
+  const key=localStorage.getItem('gemini_api_key');
+  if(!key){alert('请先在「更多 → AI 设置」中输入 Gemini API Key');return;}
+  document.getElementById(`ai-${type}-input`).click();
+}
+async function handleAIScan(type,input){
+  const file=input.files[0];if(!file)return;
+  const key=localStorage.getItem('gemini_api_key');
+  if(!key)return;
+  input.value='';
+  // 压缩图片至 1024px
+  const compressed=await new Promise(resolve=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=1024;let[w,h]=[img.width,img.height];
+        if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+        const canvas=document.createElement('canvas');
+        [canvas.width,canvas.height]=[w,h];
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        canvas.toBlob(blob=>resolve(blob),'image/jpeg',0.80);
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  // 转 base64
+  const b64=await new Promise(resolve=>{
+    const r=new FileReader();
+    r.onload=e=>resolve(e.target.result.split(',')[1]);
+    r.readAsDataURL(compressed);
+  });
+  // 显示加载状态
+  const loadingId=`ai-loading-${type}`;
+  const targetEl=document.getElementById(type==='fuel'?'f-date':'m-date').closest('.card');
+  let loadingDiv=document.createElement('div');
+  loadingDiv.id=loadingId;
+  loadingDiv.style.cssText='font-size:12px;color:var(--blue);padding:8px 0;text-align:center';
+  loadingDiv.textContent='⏳ AI 识别中…';
+  targetEl.insertBefore(loadingDiv,targetEl.querySelector('.divider'));
+  const prompt=type==='fuel'
+    ?`分析这张图片（可能是加油收据或里程表），提取信息以JSON返回，无法识别返回null，只返回JSON不要其他文字：{"km":里程数字,"liters":加油升数,"price_per_liter":每升单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
+    :`分析这张保养报告或收据图片，提取信息以JSON返回，无法识别返回null，只返回JSON不要其他文字：{"km":当前里程数字,"type":保养项目名称中文,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
+  try{
+    const res=await fetch(GEMINI_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({
+        model:GEMINI_MODEL,max_tokens:500,
+        messages:[{role:'user',content:[
+          {type:'image_url',image_url:{url:`data:image/jpeg;base64,${b64}`}},
+          {type:'text',text:prompt}
+        ]}]
+      })
+    });
+    if(res.status===429){throw new Error('QUOTA');}
+    if(res.status===401){throw new Error('AUTH');}
+    if(res.status===400){throw new Error('FORMAT');}
+    if(!res.ok){throw new Error('SERVER');}
+    const data=await res.json();
+    const text=data.choices?.[0]?.message?.content||'';
+    const clean=text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    if(!parsed){throw new Error('NULL');}
+    // 填入表单
+    const hl='background:rgba(64,144,232,.12);border-radius:4px'; // AI填入高亮样式
+    if(type==='fuel'){
+      if(parsed.km){const el=document.getElementById('f-km');el.value=parsed.km;el.style.cssText=hl;}
+      if(parsed.liters){const el=document.getElementById('f-liters');el.value=parsed.liters;el.style.cssText=hl;}
+      if(parsed.price_per_liter){const el=document.getElementById('f-price');el.value=parsed.price_per_liter;el.style.cssText=hl;}
+      if(parsed.station){const el=document.getElementById('f-station');el.value=parsed.station;el.style.cssText=hl;}
+      if(parsed.fuel_type){document.getElementById('f-type').value=parsed.fuel_type;}
+      updatePreview();
+    }else{
+      if(parsed.km){const el=document.getElementById('m-km');el.value=parsed.km;el.style.cssText=hl;}
+      if(parsed.cost){const el=document.getElementById('m-cost');el.value=parsed.cost;el.style.cssText=hl;}
+      if(parsed.shop){const el=document.getElementById('m-shop');el.value=parsed.shop;el.style.cssText=hl;}
+      if(parsed.note){const el=document.getElementById('m-note');el.value=parsed.note;el.style.cssText=hl;}
+      if(parsed.type){
+        const sel=document.getElementById('m-type');
+        const opt=[...sel.options].find(o=>o.value===parsed.type);
+        if(opt)sel.value=parsed.type;
+      }
+      autoNextKm();
+    }
+    loadingDiv.textContent='✅ 识别完成，请核对后提交';
+    loadingDiv.style.color='var(--green)';
+    setTimeout(()=>loadingDiv.remove(),3000);
+  }catch(e){
+    const msg={
+      QUOTA:'今日 AI 识别额度已用完，明天再试',
+      AUTH:'API Key 无效，请到「更多 → AI 设置」更新',
+      FORMAT:'图片格式错误，请重新拍摄',
+      SERVER:'服务器暂时故障，请稍后重试',
+      NULL:'无法识别图片内容，请手动填写',
+    }[e.message]||'识别失败，请手动填写';
+    loadingDiv.textContent=`❌ ${msg}`;
+    loadingDiv.style.color='var(--red)';
+    setTimeout(()=>loadingDiv.remove(),4000);
+  }
+}
+
+// ── ANOMALY DETECTION ────────────────────────────────
+function detectAnomalies(fuel) {
+  // 返回异常记录的 id Set，供 renderFuelList 使用
+  const anomalies = new Set();
+  const effs = computeEfficiency(fuel); // 已过滤 excluded
+  if (effs.length < 5) return anomalies; // 至少 5 段有效记录
+  const avg = effs.reduce((s, e) => s + e.kmL, 0) / effs.length;
+  // 找出异常段对应的加油记录日期
+  const validFuel = [...fuel].filter(r => !r.excluded).sort((a, b) => a.km - b.km);
+  let pend = 0, segStart = -1;
+  for (let i = 0; i < validFuel.length; i++) {
+    const r = validFuel[i];
+    if (i === 0) { if (r.notFull) pend += r.liters; else { pend = 0; segStart = i; } continue; }
+    pend += r.liters;
+    if (!r.notFull) {
+      const si = segStart >= 0 ? segStart : 0;
+      const dist = r.km - validFuel[si].km;
+      if (dist > 30) {
+        const kmL = dist / pend;
+        if (kmL > avg * 1.5 || kmL < avg * 0.8) {
+          anomalies.add(r.id); // 标记该段终点记录为异常
+        }
+      }
+      pend = 0; segStart = i;
+    }
+  }
+  return anomalies;
+}
+
 // ── EFFICIENCY ────────────────────────────────────────
 function computeEfficiency(fuel){
-  if(fuel.length<2)return[];
-  const sorted=[...fuel].sort((a,b)=>a.km-b.km);
+  const validFuel=fuel.filter(r=>!r.excluded);
+  if(validFuel.length<2)return[];
+  const sorted=[...validFuel].sort((a,b)=>a.km-b.km);
   const res=[];let pend=0,segStart=-1;
   for(let i=0;i<sorted.length;i++){
     const r=sorted[i];
@@ -1586,10 +1794,26 @@ function renderAnalytics(){
   const tf=fuel.reduce((s,r)=>s+r.total,0),tm=maint.reduce((s,r)=>s+r.cost,0);
   document.getElementById('a-tfuel').textContent=tf?tf.toFixed(0):'—';
   document.getElementById('a-tmaint').textContent=tm?tm.toFixed(0):'—';
+  const validFuel=fuel.filter(r=>!r.excluded);
+  const excludedCount=fuel.filter(r=>r.excluded).length;
   document.getElementById('a-fcount').textContent=fuel.length||'—';
-  const fuelKms=fuel.map(r=>r.km);
-  const mx=fuelKms.length?Math.max(...fuelKms):0,mn=fuelKms.length?Math.min(...fuelKms):0;
-  document.getElementById('a-cpkm').textContent=(mx-mn)>0?((tf+tm)/(mx-mn)).toFixed(3):'—';
+  // 每公里成本：基于有效油耗分段计算
+  const effs=computeEfficiency(fuel); // 已内部过滤 excluded
+  const totalValidDist=effs.reduce((s,e)=>s+e.dist,0);
+  if(totalValidDist>0){
+    // 只统计里程在有效加油记录范围内的保养费
+    const validKms=validFuel.map(r=>r.km);
+    const vMin=Math.min(...validKms),vMax=Math.max(...validKms);
+    const maintInRange=maint.filter(r=>r.km>=vMin&&r.km<=vMax).reduce((s,r)=>s+r.cost,0);
+    const validFuelCost=validFuel.reduce((s,r)=>s+r.total,0);
+    document.getElementById('a-cpkm').textContent=((validFuelCost+maintInRange)/totalValidDist).toFixed(3);
+    // 说明文字
+    const note=excludedCount>0?`基于 ${effs.length} 段有效记录（已排除 ${excludedCount} 条）`:`基于 ${effs.length} 段有效记录`;
+    document.getElementById('a-cpkm-note').textContent=note;
+  }else{
+    document.getElementById('a-cpkm').textContent='—';
+    document.getElementById('a-cpkm-note').textContent='';
+  }
   const cb=document.getElementById('cost-breakdown');
   if(!tf&&!tm){cb.innerHTML='<div class="empty">暂无数据</div>';}
   else{const tot=tf+tm,fp=Math.round(tf/tot*100),mp=100-fp;
@@ -1789,6 +2013,11 @@ function showEditFuelModal(id) {
   document.getElementById('ef-station').value = r.station;
   document.getElementById('ef-type').value = r.type;
   document.getElementById('ef-notfull').checked = r.notFull || false;
+  document.getElementById('ef-excluded').checked = r.excluded || false;
+  // 异常提示
+  const anomalies = detectAnomalies(state.currentCarFuel);
+  const noticeEl = document.getElementById('ef-anomaly-notice');
+  noticeEl.style.display = (!r.excluded && anomalies.has(r.id)) ? 'block' : 'none';
   document.getElementById('ef-note').value = r.note || '';
   // 渲染现有附件（可删除）
   let efCurrentUrls = [...(r.attachments || [])];
@@ -1826,6 +2055,7 @@ async function saveEditFuel() {
       station: document.getElementById('ef-station').value || '未填写',
       type: document.getElementById('ef-type').value,
       notFull: document.getElementById('ef-notfull').checked,
+      excluded: document.getElementById('ef-excluded').checked,
       note: document.getElementById('ef-note').value,
       total: +(liters * price).toFixed(2),
       attachments: [...window._efCurrentUrls(), ...pendingAttach.ef]
@@ -2063,7 +2293,9 @@ Object.assign(window,{
   openSuggest,filterSuggest,selectSuggest,
   setMaintFilter,refreshMaintFilter,
   setFuelMonthFilter,refreshFuelMonthFilter,
-  setMaintYearFilter,refreshMaintYearFilter
+  setMaintYearFilter,refreshMaintYearFilter,
+  showAISettingsModal,hideAISettingsModal,saveAIKey,clearAIKey,
+  triggerAIScan
 });
 </script>
 </body>
