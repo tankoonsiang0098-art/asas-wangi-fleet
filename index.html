@@ -229,7 +229,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.5</div>
+    <div class="hsub">Asas Wangi Fleet · v5.6</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -335,7 +335,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
       <div style="font-size:12px;color:var(--text3)" id="fuel-total-preview"></div>
     </div>
   </div>
-  <div class="sh">历史加油记录</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;
+    margin:14px 0 8px">
+    <div class="sh" style="margin:0">历史加油记录</div>
+    <select id="fuel-month-filter-sel"
+      onchange="setFuelMonthFilter(this.value)"
+      style="background:var(--bg3);border:1px solid var(--border2);
+      border-radius:7px;padding:5px 10px;color:var(--text2);
+      font-family:var(--bf);font-size:12px;outline:none;cursor:pointer;
+      max-width:130px">
+      <option value="all">全部月份</option>
+    </select>
+  </div>
   <div id="fuel-list"><div class="empty">暂无记录</div></div>
 </div>
 
@@ -391,16 +402,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
     <button class="btn btn-primary" onclick="addMaint()" style="width:100%">记录保养</button>
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;
-    margin:14px 0 8px">
+    margin:14px 0 8px;flex-wrap:wrap;gap:6px">
     <div class="sh" style="margin:0">历史保养记录</div>
-    <select id="maint-filter-sel"
-      onchange="setMaintFilter(this.value)"
-      style="background:var(--bg3);border:1px solid var(--border2);
-      border-radius:7px;padding:5px 10px;color:var(--text2);
-      font-family:var(--bf);font-size:12px;outline:none;cursor:pointer;
-      max-width:150px">
-      <option value="all">全部项目</option>
-    </select>
+    <div style="display:flex;gap:6px">
+      <select id="maint-month-filter-sel"
+        onchange="setMaintMonthFilter(this.value)"
+        style="background:var(--bg3);border:1px solid var(--border2);
+        border-radius:7px;padding:5px 10px;color:var(--text2);
+        font-family:var(--bf);font-size:12px;outline:none;cursor:pointer;
+        max-width:130px">
+        <option value="all">全部月份</option>
+      </select>
+      <select id="maint-filter-sel"
+        onchange="setMaintFilter(this.value)"
+        style="background:var(--bg3);border:1px solid var(--border2);
+        border-radius:7px;padding:5px 10px;color:var(--text2);
+        font-family:var(--bf);font-size:12px;outline:none;cursor:pointer;
+        max-width:130px">
+        <option value="all">全部项目</option>
+      </select>
+    </div>
   </div>
   <div id="maint-list"><div class="empty">暂无记录</div></div>
 </div>
@@ -820,6 +841,8 @@ let customMaintTypes = [];
 const pendingAttach = { f: [], m: [], dr: [], ef: [], em: [], edr: [] };
 
 let maintFilter = 'all'; // 保养记录筛选状态
+let fuelMonthFilter = 'all';  // 加油记录月份筛选
+let maintMonthFilter = 'all'; // 保养记录月份筛选
 let state = {
   currentCarId:null, cars:[], currentCarFuel:[], currentCarMaint:[], currentCarDRs:[],
   currentUser:null, currentMember:null, members:[]
@@ -1017,6 +1040,8 @@ function selectCar(id){
   if(id===state.currentCarId)return;
   state.currentCarId=id;
   maintFilter='all';
+  fuelMonthFilter='all';
+  maintMonthFilter='all';
   listenToCarData(id);
 }
 async function addCar(){
@@ -1066,6 +1091,18 @@ async function addFuel(){
   const note=document.getElementById('f-note').value;
   const notFull=document.getElementById('f-notfull').checked;
   if(!km||!liters||!price){alert('请填写里程、升数和单价');return;}
+  // 数值合理性验证
+  if(km<1000||km>9999999){alert('里程数值异常，请检查（应介于 1,000 – 9,999,999 km）');return;}
+  if(liters<1||liters>200){alert('升数异常，请检查（应介于 1 – 200 L）');return;}
+  if(price<0.5||price>10){alert('单价异常，请检查（应介于 RM 0.50 – RM 10.00 /L）');return;}
+  // 里程回退检测
+  const car2=currentCar();
+  if(car2&&car2.fuel.length){
+    const lastKm=Math.max(...car2.fuel.map(r=>r.km));
+    if(km<lastKm-50){
+      if(!confirm(`当前里程 ${km.toLocaleString()} km 低于上次记录 ${lastKm.toLocaleString()} km，是否继续？`))return;
+    }
+  }
   try{
     await addDoc(collection(db,`${ORG}/cars/${car.id}/fuel`),{
       date,km,liters,price,station,type,note,notFull,
@@ -1094,7 +1131,9 @@ function updatePreview(){
   if(l&&p)el.textContent=`总计 RM ${(l*p).toFixed(2)}`;else el.textContent='';
 }
 function renderFuelList(){
-  const c=currentCar();const fuel=c?[...c.fuel].reverse():[];
+  const c=currentCar();
+  let fuel=c?[...c.fuel].reverse():[];
+  if(fuelMonthFilter!=='all') fuel=fuel.filter(r=>r.date.slice(0,7)===fuelMonthFilter);
   const el=document.getElementById('fuel-list');
   if(!fuel.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
   el.innerHTML=fuel.map(r=>{
@@ -1117,8 +1156,19 @@ async function addMaint(){
   if(!date){alert('日期格式不正确，请输入 DD/MM/YY');return;}
   const km=parseFloat(document.getElementById('m-km').value);
   if(!km){alert('请填写当前里程');return;}
+  // 数值合理性验证
+  if(km<1000||km>9999999){alert('里程数值异常，请检查（应介于 1,000 – 9,999,999 km）');return;}
   const type=document.getElementById('m-type').value;
   const cost=parseFloat(document.getElementById('m-cost').value)||0;
+  if(cost<0||cost>99999){alert('费用异常，请检查（应介于 RM 0 – RM 99,999）');return;}
+  // 里程回退检测
+  const car2=currentCar();
+  if(car2&&car2.maint.length){
+    const lastKm=Math.max(...car2.maint.map(r=>r.km));
+    if(km<lastKm-50){
+      if(!confirm(`当前里程 ${km.toLocaleString()} km 低于上次保养记录 ${lastKm.toLocaleString()} km，是否继续？`))return;
+    }
+  }
   const nextKm=parseFloat(document.getElementById('m-next-km').value)||null;
   const shop=document.getElementById('m-shop').value||'未填写';
   const note=document.getElementById('m-note').value;
@@ -1149,6 +1199,7 @@ function renderMaintList(){
   const c=currentCar();
   let maint=c?[...c.maint].reverse():[];
   if(maintFilter !== 'all') maint = maint.filter(r => r.type === maintFilter);
+  if(maintMonthFilter !== 'all') maint = maint.filter(r => r.date.slice(0,7) === maintMonthFilter);
   const el=document.getElementById('maint-list');
   if(!maint.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
   el.innerHTML=maint.map(r=>{
@@ -1843,6 +1894,44 @@ async function saveEditMaint() {
 
 // ── SUGGESTIONS ──────────────────────────────────────
 let suggestData = { station: [], shop: [] };
+// ── FUEL MONTH FILTER ────────────────────────────────
+function setFuelMonthFilter(val) {
+  fuelMonthFilter = val;
+  renderFuelList();
+}
+function refreshFuelMonthFilter() {
+  const sel = document.getElementById('fuel-month-filter-sel');
+  if (!sel) return;
+  const c = currentCar();
+  const months = [...new Set((c?.fuel || []).map(r => r.date.slice(0, 7)))].sort().reverse();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="all">全部月份</option>' +
+    months.map(m => `<option value="${m}"${m === cur ? ' selected' : ''}>${m}</option>`).join('');
+  if (cur !== 'all' && !months.includes(cur)) {
+    sel.value = 'all';
+    fuelMonthFilter = 'all';
+  }
+}
+
+// ── MAINT MONTH FILTER ───────────────────────────────
+function setMaintMonthFilter(val) {
+  maintMonthFilter = val;
+  renderMaintList();
+}
+function refreshMaintMonthFilter() {
+  const sel = document.getElementById('maint-month-filter-sel');
+  if (!sel) return;
+  const c = currentCar();
+  const months = [...new Set((c?.maint || []).map(r => r.date.slice(0, 7)))].sort().reverse();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="all">全部月份</option>' +
+    months.map(m => `<option value="${m}"${m === cur ? ' selected' : ''}>${m}</option>`).join('');
+  if (cur !== 'all' && !months.includes(cur)) {
+    sel.value = 'all';
+    maintMonthFilter = 'all';
+  }
+}
+
 function setMaintFilter(val) {
   maintFilter = val;
   renderMaintList();
@@ -1914,6 +2003,8 @@ function renderAll(){
   if(at==='records')renderAllRecords();
   refreshSuggestions();
   refreshMaintFilter();
+  refreshFuelMonthFilter();
+  refreshMaintMonthFilter();
 }
 
 // ── BOTTOM NAV ────────────────────────────────────────
@@ -1970,7 +2061,9 @@ Object.assign(window,{
   showEditMaintModal,hideEditMaintModal,saveEditMaint,
   showEditDRModal,hideEditDRModal,saveEditDR,
   openSuggest,filterSuggest,selectSuggest,
-  setMaintFilter,refreshMaintFilter
+  setMaintFilter,refreshMaintFilter,
+  setFuelMonthFilter,refreshFuelMonthFilter,
+  setMaintMonthFilter,refreshMaintMonthFilter
 });
 </script>
 </body>
