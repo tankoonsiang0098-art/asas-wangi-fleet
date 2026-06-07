@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.8</div>
+    <div class="hsub">Asas Wangi Fleet · v5.9</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -289,7 +289,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
           style="background:rgba(64,144,232,.15);border:1px solid rgba(64,144,232,.3);border-radius:6px;
           color:var(--blue);padding:7px 8px;cursor:pointer;flex-shrink:0;font-size:14px"
           title="AI 识别收据">📷</button>
-        <input type="file" id="ai-fuel-input" accept="image/*" capture="environment"
+        <input type="file" id="ai-fuel-input" accept="image/*" multiple
           style="display:none" onchange="handleAIScan('fuel',this)">
         </div>
       </div>
@@ -372,7 +372,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
             style="background:rgba(64,144,232,.15);border:1px solid rgba(64,144,232,.3);border-radius:6px;
             color:var(--blue);padding:7px 9px;cursor:pointer;flex-shrink:0;font-size:14px"
             title="AI 识别保养单">📷</button>
-          <input type="file" id="ai-maint-input" accept="image/*" capture="environment"
+          <input type="file" id="ai-maint-input" accept="image/*" multiple
             style="display:none" onchange="handleAIScan('maint',this)">
         </div>
       </div>
@@ -1538,54 +1538,60 @@ function triggerAIScan(type){
   document.getElementById(`ai-${type}-input`).click();
 }
 async function handleAIScan(type,input){
-  const file=input.files[0];if(!file)return;
+  const files=Array.from(input.files).slice(0,3); // 最多 3 张
+  if(!files.length)return;
   const key=localStorage.getItem('gemini_api_key');
   if(!key)return;
   input.value='';
-  // 压缩图片至 1024px
-  const compressed=await new Promise(resolve=>{
-    const reader=new FileReader();
-    reader.onload=e=>{
-      const img=new Image();
-      img.onload=()=>{
-        const MAX=1024;let[w,h]=[img.width,img.height];
-        if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
-        const canvas=document.createElement('canvas');
-        [canvas.width,canvas.height]=[w,h];
-        canvas.getContext('2d').drawImage(img,0,0,w,h);
-        canvas.toBlob(blob=>resolve(blob),'image/jpeg',0.80);
+  // 压缩单张图片至 1024px 并转 base64
+  async function processImage(file){
+    const compressed=await new Promise(resolve=>{
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const img=new Image();
+        img.onload=()=>{
+          const MAX=1024;let[w,h]=[img.width,img.height];
+          if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+          const canvas=document.createElement('canvas');
+          [canvas.width,canvas.height]=[w,h];
+          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          canvas.toBlob(blob=>resolve(blob),'image/jpeg',0.80);
+        };
+        img.src=e.target.result;
       };
-      img.src=e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-  // 转 base64
-  const b64=await new Promise(resolve=>{
-    const r=new FileReader();
-    r.onload=e=>resolve(e.target.result.split(',')[1]);
-    r.readAsDataURL(compressed);
-  });
+      reader.readAsDataURL(file);
+    });
+    return await new Promise(resolve=>{
+      const r=new FileReader();
+      r.onload=e=>resolve(e.target.result.split(',')[1]);
+      r.readAsDataURL(compressed);
+    });
+  }
   // 显示加载状态
   const loadingId=`ai-loading-${type}`;
   const targetEl=document.getElementById(type==='fuel'?'f-date':'m-date').closest('.card');
-  let loadingDiv=document.createElement('div');
+  let loadingDiv=document.getElementById(loadingId);
+  if(loadingDiv)loadingDiv.remove();
+  loadingDiv=document.createElement('div');
   loadingDiv.id=loadingId;
   loadingDiv.style.cssText='font-size:12px;color:var(--blue);padding:8px 0;text-align:center';
-  loadingDiv.textContent='⏳ AI 识别中…';
+  loadingDiv.textContent=`⏳ AI 识别中…（${files.length} 张图片）`;
   targetEl.insertBefore(loadingDiv,targetEl.querySelector('.divider'));
   const prompt=type==='fuel'
-    ?`分析这张图片（可能是加油收据或里程表），提取信息以JSON返回，无法识别返回null，只返回JSON不要其他文字：{"km":里程数字,"liters":加油升数,"price_per_liter":每升单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
-    :`分析这张保养报告或收据图片，提取信息以JSON返回，无法识别返回null，只返回JSON不要其他文字：{"km":当前里程数字,"type":保养项目名称中文,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
+    ?`分析这些图片（可能是同一笔加油记录的不同角度，如里程表、收据、油站招牌），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"km":里程数字,"liters":加油升数,"price_per_liter":每升单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
+    :`分析这些图片（可能是同一笔保养记录的不同角度，如保养报告、收据、里程表），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"km":当前里程数字,"type":保养项目名称中文,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
   try{
+    // 处理所有图片为 base64
+    const b64list=await Promise.all(files.map(f=>processImage(f)));
+    // 构建 content：多张图片 + 一段文字
+    const content=b64list.map(b64=>({type:'image_url',image_url:{url:`data:image/jpeg;base64,${b64}`}}));
+    content.push({type:'text',text:prompt});
     const res=await fetch(GEMINI_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
       body:JSON.stringify({
         model:GEMINI_MODEL,max_tokens:500,
-        messages:[{role:'user',content:[
-          {type:'image_url',image_url:{url:`data:image/jpeg;base64,${b64}`}},
-          {type:'text',text:prompt}
-        ]}]
+        messages:[{role:'user',content}]
       })
     });
     if(res.status===429){throw new Error('QUOTA');}
@@ -1598,7 +1604,7 @@ async function handleAIScan(type,input){
     const parsed=JSON.parse(clean);
     if(!parsed){throw new Error('NULL');}
     // 填入表单
-    const hl='background:rgba(64,144,232,.12);border-radius:4px'; // AI填入高亮样式
+    const hl='background:rgba(64,144,232,.12);border-radius:4px';
     if(type==='fuel'){
       if(parsed.km){const el=document.getElementById('f-km');el.value=parsed.km;el.style.cssText=hl;}
       if(parsed.liters){const el=document.getElementById('f-liters');el.value=parsed.liters;el.style.cssText=hl;}
@@ -1637,28 +1643,34 @@ async function handleAIScan(type,input){
 
 // ── ANOMALY DETECTION ────────────────────────────────
 function detectAnomalies(fuel) {
-  // 返回异常记录的 id Set，供 renderFuelList 使用
   const anomalies = new Set();
-  const effs = computeEfficiency(fuel); // 已过滤 excluded
+  const effs = computeEfficiency(fuel);
   if (effs.length < 5) return anomalies; // 至少 5 段有效记录
   const avg = effs.reduce((s, e) => s + e.kmL, 0) / effs.length;
-  // 找出异常段对应的加油记录日期
-  const validFuel = [...fuel].filter(r => !r.excluded).sort((a, b) => a.km - b.km);
-  let pend = 0, segStart = -1;
-  for (let i = 0; i < validFuel.length; i++) {
-    const r = validFuel[i];
-    if (i === 0) { if (r.notFull) pend += r.liters; else { pend = 0; segStart = i; } continue; }
+  // 重新遍历，记录每个有效段终点记录的 id
+  const sorted = [...fuel].sort((a, b) => a.km - b.km);
+  let pend = 0, segStartKm = null, polluted = false;
+  for (let i = 0; i < sorted.length; i++) {
+    const r = sorted[i];
+    if (r.excluded) {
+      pend = 0; polluted = true;
+      if (!r.notFull) { segStartKm = r.km; polluted = false; } else { segStartKm = null; }
+      continue;
+    }
+    if (segStartKm === null) {
+      if (!r.notFull) { segStartKm = r.km; pend = 0; polluted = false; } else { pend = 0; }
+      continue;
+    }
     pend += r.liters;
     if (!r.notFull) {
-      const si = segStart >= 0 ? segStart : 0;
-      const dist = r.km - validFuel[si].km;
-      if (dist > 30) {
+      const dist = r.km - segStartKm;
+      if (!polluted && dist > 30 && pend > 0) {
         const kmL = dist / pend;
         if (kmL > avg * 1.5 || kmL < avg * 0.8) {
           anomalies.add(r.id); // 标记该段终点记录为异常
         }
       }
-      pend = 0; segStart = i;
+      segStartKm = r.km; pend = 0; polluted = false;
     }
   }
   return anomalies;
@@ -1666,19 +1678,61 @@ function detectAnomalies(fuel) {
 
 // ── EFFICIENCY ────────────────────────────────────────
 function computeEfficiency(fuel){
-  const validFuel=fuel.filter(r=>!r.excluded);
-  if(validFuel.length<2)return[];
-  const sorted=[...validFuel].sort((a,b)=>a.km-b.km);
-  const res=[];let pend=0,segStart=-1;
+  if(fuel.length<2)return[];
+  // 注意：不预先过滤 excluded，需在遍历中处理污染逻辑
+  const sorted=[...fuel].sort((a,b)=>a.km-b.km);
+  const res=[];
+  let pend=0;          // 当前累积油量
+  let segStartKm=null; // 当前计算段起点里程（null=无有效起点）
+  let polluted=false;  // 当前段是否被 excluded 污染
+  let segCount=0;      // 当前段合并的记录数
+
   for(let i=0;i<sorted.length;i++){
     const r=sorted[i];
-    if(i===0){if(r.notFull)pend+=r.liters;else{pend=0;segStart=i;}continue;}
-    pend+=r.liters;
-    if(!r.notFull){
-      const si=segStart>=0?segStart:0;const dist=r.km-sorted[si].km;
-      if(dist>30)res.push({date:r.date,kmL:+(dist/pend).toFixed(2),dist,liters:+pend.toFixed(1),segments:i-si});
-      pend=0;segStart=i;
+
+    if(r.excluded){
+      // 排除记录：油量不可信，丢弃 pend，标记污染
+      pend=0;
+      segCount=0;
+      polluted=true;
+      if(!r.notFull){
+        // excluded 且满箱：里程可作为新起点，污染到此为止
+        segStartKm=r.km;
+        polluted=false;
+      }else{
+        // excluded 且未加满：连起点都不能作，等下一个满箱
+        segStartKm=null;
+      }
+      continue;
     }
+
+    // 正常记录
+    if(segStartKm===null){
+      // 当前无有效起点
+      if(!r.notFull){
+        // 满箱 → 作为新起点
+        segStartKm=r.km;pend=0;segCount=0;polluted=false;
+      }else{
+        // 未加满且无起点 → 累积无意义，跳过
+        pend=0;
+      }
+      continue;
+    }
+
+    // 有有效起点，累积油量
+    pend+=r.liters;
+    segCount++;
+
+    if(!r.notFull){
+      // 满箱 → 结算这一段
+      const dist=r.km-segStartKm;
+      if(!polluted && dist>30 && pend>0){
+        res.push({date:r.date,kmL:+(dist/pend).toFixed(2),dist,liters:+pend.toFixed(1),segments:segCount});
+      }
+      // 无论是否计算，满箱后都重置为新起点
+      segStartKm=r.km;pend=0;segCount=0;polluted=false;
+    }
+    // 未加满则继续累积，等下次满箱
   }
   return res;
 }
