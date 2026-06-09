@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.10</div>
+    <div class="hsub">Asas Wangi Fleet · v5.11</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -250,7 +250,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <button class="tab" data-tab="daterem" onclick="switchTab('daterem')">📅 日期提醒</button>
   <button class="tab" data-tab="analytics" onclick="switchTab('analytics')">分析</button>
   <button class="tab" data-tab="records" onclick="switchTab('records')">记录</button>
-  <button class="tab" data-tab="admin" id="tab-admin" onclick="switchTab('admin')" style="display:none">⚙️ 管理</button>
+  <button class="tab" id="tab-admin-btn" data-tab="admin" onclick="switchTab('admin')" style="display:none">⚙️ 管理</button>
   <button class="tab" onclick="showAISettingsModal()" style="margin-left:auto;flex:0 0 auto">🤖 AI</button>
 </div>
 
@@ -892,7 +892,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   padding:8px;z-index:51;min-width:150px">
   <button class="more-menu-btn" onclick="switchTab('analytics');closeMoreMenu()">📊 分析</button>
   <button class="more-menu-btn" onclick="switchTab('records');closeMoreMenu()">📋 记录</button>
-  <button class="more-menu-btn" id="more-admin-btn" style="display:none"
+  <button class="more-menu-btn" id="nav-admin-btn" style="display:none"
     onclick="switchTab('admin');closeMoreMenu()">⚙️ 管理</button>
   <button class="more-menu-btn" onclick="showAISettingsModal();closeMoreMenu()">🤖 AI 设置</button>
 </div>
@@ -1024,10 +1024,10 @@ function startApp() {
   document.getElementById('user-name').textContent=m.displayName;
   document.getElementById('user-avatar').textContent=m.displayName[0].toUpperCase();
   if (m.role==='admin') {
-    document.getElementById('tab-admin').style.display='';
+    document.getElementById('tab-admin-btn').style.display='';
     document.getElementById('btn-manage-cars').style.display='';
     document.getElementById('btn-clear').style.display='';
-    document.getElementById('more-admin-btn').style.display='block';
+    document.getElementById('nav-admin-btn').style.display='block';
     listenToMembers();
   }
   setTodayDate('f-date');
@@ -2485,6 +2485,10 @@ document.addEventListener('click', e => {
 
 // ── TAB ───────────────────────────────────────────────
 function switchTab(t){
+  if(t==='admin'&&state.currentMember?.role!=='admin'){
+    alert('权限不足：只有管理员可以访问管理界面');
+    return;
+  }
   document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===t));
   document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
   document.getElementById('panel-'+t)?.classList.add('active');
@@ -2503,6 +2507,13 @@ function renderAll(){
   refreshMaintFilter();
   refreshFuelMonthFilter();
   refreshMaintYearFilter();
+  const isAdmin=state.currentMember?.role==='admin';
+  const btnManage=document.getElementById('btn-manage-cars');
+  if(btnManage)btnManage.style.display=isAdmin?'':'none';
+  const tabAdminBtn=document.getElementById('tab-admin-btn');
+  if(tabAdminBtn)tabAdminBtn.style.display=isAdmin?'':'none';
+  const navAdminBtn=document.getElementById('nav-admin-btn');
+  if(navAdminBtn)navAdminBtn.style.display=isAdmin?'':'none';
 }
 
 // ── BOTTOM NAV ────────────────────────────────────────
