@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.11</div>
+    <div class="hsub">Asas Wangi Fleet · v5.12</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -1054,10 +1054,17 @@ function listenToCars() {
     }
     all.sort((a,b)=>(a.plate||'').localeCompare(b.plate||''));
     state.cars=all;
-    if(!state.currentCarId&&all.length){state.currentCarId=all[0].id;listenToCarData(state.currentCarId);}
-    else if(state.currentCarId&&!all.find(c=>c.id===state.currentCarId)){
-      state.currentCarId=all.length?all[0].id:null;
-      if(state.currentCarId)listenToCarData(state.currentCarId);else stopCarListeners();
+    if(!state.currentCarId && all.length){
+      const saved = state.currentUser?.uid
+        ? localStorage.getItem('lastCarId_'+state.currentUser.uid)
+        : null;
+      const restored = saved && all.find(c=>c.id===saved);
+      state.currentCarId = restored ? saved : all[0].id;
+      listenToCarData(state.currentCarId);
+    } else if(state.currentCarId && !all.find(c=>c.id===state.currentCarId)){
+      state.currentCarId = all.length ? all[0].id : null;
+      if(state.currentCarId) listenToCarData(state.currentCarId);
+      else stopCarListeners();
     }
     renderCarSel();renderDashboard();renderAnalytics();
   });
@@ -1133,6 +1140,9 @@ function setTodayDate(fieldId){
 function selectCar(id){
   if(id===state.currentCarId)return;
   state.currentCarId=id;
+  if(state.currentUser?.uid){
+    localStorage.setItem('lastCarId_'+state.currentUser.uid, id);
+  }
   maintFilter='all';
   fuelMonthFilter='all';
   maintYearFilter='all';
