@@ -1,4 +1,4 @@
-const CACHE = 'autolog-v512';
+const CACHE = 'autolog-v513';
 const ASSETS = [
   '/asas-wangi-fleet/',
   '/asas-wangi-fleet/index.html',

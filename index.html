@@ -1659,7 +1659,7 @@ async function startAIScan() {
     });
   }
   const prompt = aiScanType === 'fuel'
-    ? `分析这些图片（可能是同一笔加油记录的不同角度，如里程表、收据、油站招牌），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"date":"日期格式DD/MM/YY如01/06/26","km":里程数字,"liters":加油升数,"price_per_liter":每升单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
+    ? `分析这些图片（可能是同一笔加油记录的不同角度，如里程表、收据、油站招牌），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字。注意：1) price_per_liter 必须是车主实际支付的每公升单价——若收据显示政府补贴（如BUDI95/BUDI价、Subsidy Price、折扣价等），必须使用补贴后实际支付的单价，绝不能使用补贴前的市场牌价（Pump Price）；可用收据上的TOTAL总金额除以升数核实结果是否一致，若不一致以total/liters计算结果为准。2) km 里程数字必须完整读取仪表上显示的每一位数字，包括最右侧可能正处于滚动切换状态的过渡数字（半格显示的数字也要读出最接近的一位，不可省略或截断），并核对总位数是否合理（通常5-6位）。{"date":"日期格式DD/MM/YY如01/06/26","km":里程数字,"liters":加油升数,"price_per_liter":每升实际支付单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
     : `分析这些图片（可能是同一笔保养记录的不同角度，如保养报告、收据、里程表），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"date":"日期格式DD/MM/YY如01/06/26","km":当前里程数字,"type":保养项目名称中文,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
   try {
     const b64list = await Promise.all(files.map(f => processImage(f)));
@@ -1802,7 +1802,7 @@ async function handleAIScan(type,input){
   loadingDiv.textContent=`⏳ AI 识别中…（${files.length} 张图片）`;
   targetEl.insertBefore(loadingDiv,targetEl.querySelector('.divider'));
   const prompt=type==='fuel'
-    ?`分析这些图片（可能是同一笔加油记录的不同角度，如里程表、收据、油站招牌），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"date":"日期格式DD/MM/YY如01/06/26","km":里程数字,"liters":加油升数,"price_per_liter":每升单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
+    ?`分析这些图片（可能是同一笔加油记录的不同角度，如里程表、收据、油站招牌），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字。注意：1) price_per_liter 必须是车主实际支付的每公升单价——若收据显示政府补贴（如BUDI95/BUDI价、Subsidy Price、折扣价等），必须使用补贴后实际支付的单价，绝不能使用补贴前的市场牌价（Pump Price）；可用收据上的TOTAL总金额除以升数核实结果是否一致，若不一致以total/liters计算结果为准。2) km 里程数字必须完整读取仪表上显示的每一位数字，包括最右侧可能正处于滚动切换状态的过渡数字（半格显示的数字也要读出最接近的一位，不可省略或截断），并核对总位数是否合理（通常5-6位）。{"date":"日期格式DD/MM/YY如01/06/26","km":里程数字,"liters":加油升数,"price_per_liter":每升实际支付单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
     :`分析这些图片（可能是同一笔保养记录的不同角度，如保养报告、收据、里程表），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"date":"日期格式DD/MM/YY如01/06/26","km":当前里程数字,"type":保养项目名称中文,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
   try{
     // 处理所有图片为 base64
@@ -2561,32 +2561,4 @@ function attachKmHint(inputId,type){
 attachKmHint('f-km','fuel');
 attachKmHint('m-km','maint');
 
-// ── SERVICE WORKER ────────────────────────────────────
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('/asas-wangi-fleet/sw.js'));
-}
-
-// ── EXPOSE TO WINDOW ──────────────────────────────────
-Object.assign(window,{
-  loginWithGoogle,doSignOut,selectCar,addCar,deleteCar,showCarModal,hideCarModal,
-  addFuel,deleteFuel,addMaint,deleteMaint,autoNextKm,
-  addDateReminder,deleteDR,switchTab,
-  addMember,deleteMember,showCarAssignModal,hideCarAssignModal,saveCarAssignment,
-  exportData,exportReport,clearCarData,
-  openPicker,toggleMoreMenu,closeMoreMenu,
-  showAddTypeModal,saveCustomType,deleteCustomType,
-  handleUpload,removeAttach,
-  showEditFuelModal,hideEditFuelModal,saveEditFuel,
-  showEditMaintModal,hideEditMaintModal,saveEditMaint,
-  showEditDRModal,hideEditDRModal,saveEditDR,
-  openSuggest,filterSuggest,selectSuggest,
-  setMaintFilter,refreshMaintFilter,
-  setFuelMonthFilter,refreshFuelMonthFilter,
-  setMaintYearFilter,refreshMaintYearFilter,
-  showAISettingsModal,hideAISettingsModal,saveAIKey,clearAIKey,
-  triggerAIScan,handleAIScan,
-  openAIScanModal,hideAIScanModal,triggerAISlot,receiveAISlot,clearAISlot,startAIScan
-});
-</script>
-</body>
-</html>
+// ── SERVICE WORKER ─────�
