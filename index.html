@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.12</div>
+    <div class="hsub">Asas Wangi Fleet · v5.13c</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -529,6 +529,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
     </div>
     <div class="divider"></div>
     <button class="btn btn-primary" onclick="addMember()" style="width:100%">添加成员</button>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-user-check"></i> 待批准登录请求</div>
+    <div id="join-request-list"><div class="empty">加载中…</div></div>
   </div>
   <div class="card">
     <div class="card-title"><i class="ti ti-users"></i> 已登记成员</div>
@@ -939,9 +943,9 @@ let fuelMonthFilter = 'all';  // 加油记录月份筛选
 let maintYearFilter = 'all'; // 保养记录年度筛选
 let state = {
   currentCarId:null, cars:[], currentCarFuel:[], currentCarMaint:[], currentCarDRs:[],
-  currentUser:null, currentMember:null, members:[]
+  currentUser:null, currentMember:null, members:[], joinRequests:[]
 };
-const unsubs = { cars:null, fuel:null, maint:null, drs:null, member:null, members:null };
+const unsubs = { cars:null, fuel:null, maint:null, drs:null, member:null, members:null, joinRequests:null };
 
 // ── PAGE ──────────────────────────────────────────────
 function showPage(name) {
@@ -998,6 +1002,11 @@ onAuthStateChanged(auth, async user => {
       const s3=await getDoc(doc(db,`${ORG}/members`,user.uid));
       state.currentMember={...s3.data(),uid:user.uid}; startApp(); return;
     }
+    try{
+      await setDoc(doc(db,`${ORG}/join-requests`,user.uid),{
+        uid:user.uid,email:user.email,displayName:user.displayName||user.email,requestedAt:serverTimestamp()
+      },{merge:true});
+    }catch(reqErr){ console.error('join-request write failed (check Firestore rules):',reqErr); }
     document.getElementById('pending-email').textContent=user.email;
     showPage('pending');
   } catch(e) {
@@ -1029,6 +1038,7 @@ function startApp() {
     document.getElementById('btn-clear').style.display='';
     document.getElementById('nav-admin-btn').style.display='block';
     listenToMembers();
+    listenToJoinRequests();
   }
   setTodayDate('f-date');
   setTodayDate('m-date');
@@ -1094,6 +1104,12 @@ function listenToMembers(){
   if(unsubs.members)unsubs.members();
   unsubs.members=onSnapshot(collection(db,`${ORG}/members`),snap=>{
     state.members=snap.docs.map(d=>({...d.data(),uid:d.id}));renderMemberList();
+  });
+}
+function listenToJoinRequests(){
+  if(unsubs.joinRequests)unsubs.joinRequests();
+  unsubs.joinRequests=onSnapshot(collection(db,`${ORG}/join-requests`),snap=>{
+    state.joinRequests=snap.docs.map(d=>({...d.data(),uid:d.id}));renderJoinRequestList();
   });
 }
 
@@ -2192,7 +2208,36 @@ function renderMemberList(){
       </div></div>`;
   }).join('');
 }
-function renderAdminPanel(){renderMemberList();}
+function renderJoinRequestList(){
+  const el=document.getElementById('join-request-list');
+  if(!el)return;
+  if(!state.joinRequests.length){el.innerHTML='<div class="empty">暂无待批准请求</div>';return;}
+  el.innerHTML=state.joinRequests.map(r=>`<div class="member-row">
+      <div class="member-info">
+        <div class="member-name">${esc(r.displayName)}</div>
+        <div class="member-meta">${esc(r.email)} · 等待批准</div>
+      </div>
+      <div class="member-actions">
+        <button class="btn btn-sm btn-primary" onclick="approveJoinRequest('${r.uid}')">批准</button>
+        <button class="btn btn-sm btn-danger" onclick="rejectJoinRequest('${r.uid}')">拒绝</button>
+      </div></div>`).join('');
+}
+async function approveJoinRequest(uid){
+  const r=state.joinRequests.find(r=>r.uid===uid);if(!r)return;
+  if(!confirm(`批准 ${r.displayName}（${r.email}）加入？将以"普通成员"身份加入，之后可在成员列表编辑车辆权限。`))return;
+  try{
+    await setDoc(doc(db,`${ORG}/members`,uid),{
+      uid,email:r.email,displayName:r.displayName,role:'member',assignedCars:[],joinedAt:serverTimestamp()
+    });
+    await deleteDoc(doc(db,`${ORG}/join-requests`,uid));
+  }catch(e){alert('批准失败: '+e.message);}
+}
+async function rejectJoinRequest(uid){
+  const r=state.joinRequests.find(r=>r.uid===uid);if(!r)return;
+  if(!confirm(`拒绝 ${r.displayName}（${r.email}）的加入请求？`))return;
+  try{await deleteDoc(doc(db,`${ORG}/join-requests`,uid));}catch(e){alert('拒绝失败: '+e.message);}
+}
+function renderAdminPanel(){renderMemberList();renderJoinRequestList();}
 async function deleteMember(uid){
   const m=state.members.find(m=>m.uid===uid);if(!m)return;
   if(!confirm(`确认删除成员 ${m.displayName}？`))return;
@@ -2570,6 +2615,7 @@ if('serviceWorker' in navigator){
 Object.assign(window,{
   loginWithGoogle,doSignOut,selectCar,addCar,deleteCar,showCarModal,hideCarModal,
   addFuel,deleteFuel,addMaint,deleteMaint,autoNextKm,
+  approveJoinRequest,rejectJoinRequest,
   addDateReminder,deleteDR,switchTab,
   addMember,deleteMember,showCarAssignModal,hideCarAssignModal,saveCarAssignment,
   exportData,exportReport,clearCarData,
