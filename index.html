@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.13c</div>
+    <div class="hsub">Asas Wangi Fleet · v5.15</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -1676,7 +1676,7 @@ async function startAIScan() {
   }
   const prompt = aiScanType === 'fuel'
     ? `分析这些图片（可能是同一笔加油记录的不同角度，如里程表、收据、油站招牌），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字。注意：1) price_per_liter 必须是车主实际支付的每公升单价。若收据有"SUBSIDY INFORMATION"区块且列出"Subsidy Price"这一行（如"Subsidy Price RM1.990/L"），必须直接照抄这个标注数值本身作为price_per_liter，不要自己用total除以liters重新计算或四舍五入，因为你的心算容易有误差；绝不能使用同区块里的"Pump Price"（补贴前市场牌价）。若收据完全没有Subsidy Price这一行，才用TOTAL总金额精确除以liters算出单价（保留3位小数）。2) km 里程数字必须完整读取仪表上显示的每一位数字，包括最右侧可能正处于滚动切换状态的过渡数字（半格显示的数字也要读出最接近的一位，不可省略或截断），并核对总位数是否合理（通常5-6位）。{"date":"日期格式DD/MM/YY如01/06/26","km":里程数字,"liters":加油升数,"price_per_liter":每升实际支付单价RM,"total":总金额RM,"station":油站名称,"fuel_type":"RON95或RON97或柴油或其他"}`
-    : `分析这些图片（可能是同一笔保养记录的不同角度，如保养报告、收据、里程表），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字：{"date":"日期格式DD/MM/YY如01/06/26","km":当前里程数字,"type":保养项目名称中文,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
+    : `分析这些图片（可能是同一笔保养记录的不同角度，如保养报告、收据、里程表），综合所有图片信息，提取为一笔记录的JSON返回，无法识别的字段返回null，只返回JSON不要其他文字。注意：type 字段必须从下面这个列表中选一个字面完全一致的项目名称：[${[...DEFAULT_MAINT_TYPES,...customMaintTypes].map(t=>`"${t}"`).join(',')}]；如果收据上的保养项目在列表里找不到完全对应的，type 填"其他"，并把实际项目名称写进 note 字段开头。{"date":"日期格式DD/MM/YY如01/06/26","km":当前里程数字,"type":保养项目名称（必须是上面列表中的一项）,"cost":费用RM,"shop":维修店名称,"note":备注如产品型号润滑油品牌等}`;
   try {
     const b64list = await Promise.all(files.map(f => processImage(f)));
     const content = b64list.map(b64 => ({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${b64}` } }));
@@ -1684,7 +1684,7 @@ async function startAIScan() {
     const res = await fetch(GEMINI_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-      body: JSON.stringify({ model: GEMINI_MODEL, max_tokens: 500, messages: [{ role: 'user', content }] })
+      body: JSON.stringify({ model: GEMINI_MODEL, max_tokens: 500, temperature: 0, messages: [{ role: 'user', content }] })
     });
     if (res.status === 429) throw new Error('QUOTA');
     if (res.status === 401) throw new Error('AUTH');
@@ -1693,7 +1693,9 @@ async function startAIScan() {
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content || '';
     const clean = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
+    let parsed;
+    try { parsed = JSON.parse(clean); }
+    catch(parseErr) { console.error('AI返回内容无法解析为JSON:', text); throw new Error('PARSE'); }
     if (!parsed) throw new Error('NULL');
     // 填入表单
     const hl = 'background:rgba(64,144,232,.12);border-radius:4px';
@@ -1713,8 +1715,19 @@ async function startAIScan() {
       if (parsed.note) { const el = document.getElementById('m-note'); el.value = parsed.note; el.style.cssText = hl; }
       if (parsed.type) {
         const sel = document.getElementById('m-type');
-        const opt = [...sel.options].find(o => o.value === parsed.type);
-        if (opt) sel.value = parsed.type;
+        const norm = s => String(s||'').trim();
+        let opt = [...sel.options].find(o => norm(o.value) === norm(parsed.type));
+        if (!opt) opt = [...sel.options].find(o => norm(o.value).includes(norm(parsed.type)) || norm(parsed.type).includes(norm(o.value)));
+        if (opt) {
+          sel.value = opt.value;
+        } else {
+          sel.value = '其他';
+          const noteEl = document.getElementById('m-note');
+          if (noteEl && !noteEl.value.includes(parsed.type)) {
+            noteEl.value = noteEl.value ? `${parsed.type}；${noteEl.value}` : `AI识别项目：${parsed.type}`;
+            noteEl.style.cssText = hl;
+          }
+        }
       }
       autoNextKm();
     }
@@ -1730,7 +1743,9 @@ async function startAIScan() {
       FORMAT: '图片格式错误，请重新拍摄',
       SERVER: '服务器暂时故障，请稍后重试',
       NULL: '无法识别图片内容，请手动填写',
+      PARSE: 'AI返回格式异常，请重试或手动填写',
     }[e.message] || '识别失败，请手动填写';
+    console.error('AI识别失败:', e);
     status.textContent = `❌ ${msg}`;
     status.style.color = 'var(--red)';
     btn.disabled = false;
