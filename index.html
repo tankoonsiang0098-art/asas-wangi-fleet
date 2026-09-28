@@ -230,7 +230,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--bf);font-size:14px
   <div class="logo">🚗</div>
   <div class="htitles">
     <div class="htitle">AUTO LOG <span style="font-size:11px;font-weight:400;color:var(--text3)">PRO</span></div>
-    <div class="hsub">Asas Wangi Fleet · v5.15</div>
+    <div class="hsub">Asas Wangi Fleet · v5.16</div>
   </div>
   <div class="hright">
     <select id="car-sel" class="car-sel" onchange="selectCar(this.value)"></select>
@@ -1212,7 +1212,7 @@ async function addFuel(){
   const notFull=document.getElementById('f-notfull').checked;
   if(!km||!liters||!price){alert('请填写里程、升数和单价');return;}
   // 数值合理性验证
-  if(km<1000||km>9999999){alert('里程数值异常，请检查（应介于 1,000 – 9,999,999 km）');return;}
+  if(km<0||km>9999999){alert('里程数值异常，请检查（应介于 0 – 9,999,999 km）');return;}
   if(liters<1||liters>200){alert('升数异常，请检查（应介于 1 – 200 L）');return;}
   if(price<0.5||price>10){alert('单价异常，请检查（应介于 RM 0.50 – RM 10.00 /L）');return;}
   // 里程回退检测
@@ -1281,7 +1281,7 @@ async function addMaint(){
   const km=parseFloat(document.getElementById('m-km').value);
   if(!km){alert('请填写当前里程');return;}
   // 数值合理性验证
-  if(km<1000||km>9999999){alert('里程数值异常，请检查（应介于 1,000 – 9,999,999 km）');return;}
+  if(km<0||km>9999999){alert('里程数值异常，请检查（应介于 0 – 9,999,999 km）');return;}
   const type=document.getElementById('m-type').value;
   const cost=parseFloat(document.getElementById('m-cost').value)||0;
   if(cost<0||cost>99999){alert('费用异常，请检查（应介于 RM 0 – RM 99,999）');return;}
